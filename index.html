@@ -4,38 +4,134 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Портфельный анализ</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-:root{
-  --bg:#f4f5f7;--card:#fff;--border:#e2e4ea;--border2:#edeef2;
-  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+:root{--bg:#f4f5f7;--card:#fff;--brd:#e2e4ea;--brd2:#edeef2;--tx:#111827;--tx2:#4b5563;--tx3:#9ca3af;
   --blue:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--teal:#14b8a6;
   --blue-bg:#eff6ff;--green-bg:#ecfdf5;--red-bg:#fef2f2;--amber-bg:#fffbeb;
-  --sans:'IBM Plex Sans',system-ui,sans-serif;
-  --mono:'IBM Plex Mono',monospace;
-  --shadow:0 1px 2px rgba(0,0,0,.05);
-  --shadow2:0 4px 12px rgba(0,0,0,.06);
-}
+  --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;
+  --sh:0 1px 2px rgba(0,0,0,.05);--sh2:0 4px 12px rgba(0,0,0,.06)}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
-@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.fu{animation:fadeUp .3s ease-out both}
-::-webkit-scrollbar{width:5px;height:5px}
-::-webkit-scrollbar-track{background:transparent}
-::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:9px}
+body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px}
+::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:9px}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fu{animation:fu .3s ease-out both}
+
+.wrap{max-width:1400px;margin:0 auto;padding:24px 28px}
+.header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+.file-btns{display:flex;gap:8px;flex-wrap:wrap}
+.file-btn{padding:6px 14px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:500;font-family:var(--sans);
+  background:var(--card);border:1px solid var(--brd);color:var(--tx2);transition:all .2s;display:inline-flex;align-items:center;gap:4px}
+.file-btn:hover{border-color:var(--blue);color:var(--blue)}
+.file-btn.ok{background:var(--green-bg);border-color:var(--green);color:var(--green)}
+.file-btn input{display:none}
+
+.period-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.period-bar label{font-size:12px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+.period-bar input[type=date]{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:13px;
+  font-family:var(--sans);color:var(--tx);background:var(--card);outline:none}
+.period-bar input[type=date]:focus{border-color:var(--blue)}
+.period-info{font-size:12px;font-family:var(--mono);color:var(--tx3);background:#f3f4f6;padding:4px 12px;border-radius:8px}
+
+.nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
+.tabs{display:flex;gap:2px;background:#edeef2;border-radius:10px;padding:3px}
+.tab{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;
+  font-family:var(--sans);transition:all .15s;background:transparent;color:var(--tx3)}
+.tab.on{background:var(--tx);color:#fff}
+.nav-right{display:flex;gap:8px;align-items:center}
+.badge-count{font-size:12px;font-family:var(--mono);color:var(--red);background:var(--red-bg);padding:3px 10px;border-radius:8px}
+.toggle-sc{padding:6px 14px;border-radius:8px;border:1px solid var(--brd);background:var(--card);cursor:pointer;
+  font-size:12px;font-weight:500;font-family:var(--sans);color:var(--tx2)}
+
+.sc-panel{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:var(--sh)}
+.sc-section{margin-bottom:12px}
+.sc-section:last-child{margin-bottom:0}
+.sc-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.sc-label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
+.sc-search{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:12px;font-family:var(--sans);
+  outline:none;width:160px;background:#f9fafb;color:var(--tx)}
+.sc-search:focus{border-color:var(--blue)}
+.sc-enableall{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--sans)}
+.sc-chips{display:flex;gap:5px;flex-wrap:wrap;max-height:110px;overflow-y:auto;padding-right:4px}
+.chip{padding:4px 12px;border-radius:16px;cursor:pointer;font-size:12px;font-family:var(--sans);font-weight:500;
+  transition:all .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:20px;border:1.5px solid transparent}
+.chip.on{color:#fff}
+.chip.off{background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb;text-decoration:line-through;opacity:.65}
+.sc-reset{margin-top:12px;border-top:1px solid var(--brd2);padding-top:10px}
+.sc-reset button{padding:5px 14px;border-radius:8px;border:1px solid #fecaca;background:var(--card);
+  color:var(--red);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--sans)}
+
+.kpi-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.kpi{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:16px 20px;
+  flex:1 1 180px;min-width:160px;box-shadow:var(--sh)}
+.kpi.warn{background:var(--red-bg);border-color:#fecaca}
+.kpi-label{font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:var(--mono)}
+.kpi-val{font-size:24px;font-weight:700;letter-spacing:-.5px}
+.kpi-sub{font-size:12px;color:var(--tx3);margin-top:2px;font-family:var(--mono)}
+.kpi-delta{font-size:11px;margin-top:6px;font-family:var(--mono);display:inline-flex;align-items:center;gap:3px;
+  padding:2px 8px;border-radius:8px;font-weight:500}
+.kpi-delta.up{color:var(--green);background:var(--green-bg)}
+.kpi-delta.down{color:var(--red);background:var(--red-bg)}
+
+.impact{border-radius:12px;padding:14px 20px;margin-bottom:18px;font-size:13px;line-height:1.6}
+.impact.good{background:var(--green-bg);border:1px solid #86efac}
+.impact.bad{background:var(--red-bg);border:1px solid #fecaca}
+
+.card{background:var(--card);border:1px solid var(--brd);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
+.card-head{padding:16px 20px 0}
+.card-head h3{font-size:15px;font-weight:700;margin-bottom:2px}
+.card-head p{font-size:12px;color:var(--tx3);margin-bottom:10px}
+.card-scroll{max-height:500px;overflow-y:auto}
+table{width:100%;border-collapse:collapse}
+th{padding:10px 14px;text-align:left;color:var(--tx3);font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.8px;font-family:var(--sans);background:#fafbfc;border-bottom:2px solid var(--brd);position:sticky;top:0;z-index:1}
+td{padding:10px 14px;border-bottom:1px solid var(--brd2)}
+tr.dim{opacity:.3}
+
+.bar-wrap{height:10px;border-radius:5px;overflow:hidden;flex-shrink:0;background:#f3f4f6}
+.bar-fill{height:100%;border-radius:5px;transition:width .4s}
+.badge-pct{padding:2px 8px;border-radius:8px;font-size:11px;font-family:var(--mono);font-weight:500;display:inline-block}
+
+.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.area-card{background:var(--card);border-radius:12px;padding:20px;box-shadow:var(--sh);transition:opacity .3s}
+.area-card.off{opacity:.3}
+.area-card.warn-b{border:1.5px solid #fecaca}
+.area-card:not(.warn-b){border:1.5px solid var(--brd)}
+.area-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
+.area-card h4{font-size:15px;font-weight:700;margin-bottom:2px}
+.area-row{display:flex;justify-content:space-between;padding:5px 0}
+.area-row:not(:last-child){border-bottom:1px solid var(--brd2)}
+.area-warn{margin-top:12px;padding:8px 12px;background:var(--red-bg);border-radius:8px;font-size:12px;color:#b91c1c;line-height:1.4}
+
+/* Waterfall */
+.wf-row{display:flex;align-items:center;gap:14px;padding:9px 0}
+.wf-row:not(.bold){border-bottom:1px solid var(--brd2)}
+.wf-row.bold{border-bottom:2px solid var(--brd)}
+.wf-label{width:240px;font-size:13px;color:var(--tx2)}
+.wf-row.bold .wf-label{color:var(--tx);font-weight:700}
+.wf-bar{width:240px}
+.wf-val{font-family:var(--mono);font-size:13px;min-width:130px;text-align:right}
+.wf-row.bold .wf-val{font-weight:700}
+
+.footer{margin-top:28px;padding:12px 0;border-top:1px solid var(--brd);font-size:11px;color:var(--tx3);
+  font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+
+.toast{position:fixed;top:16px;right:16px;padding:10px 18px;border-radius:10px;font-size:13px;font-family:var(--sans);
+  z-index:999;max-width:460px;line-height:1.5;box-shadow:var(--sh2);animation:fu .3s ease-out both}
+.toast.ok{background:var(--green-bg);border:1px solid #86efac;color:var(--green)}
+.toast.err{background:var(--red-bg);border:1px solid #fecaca;color:var(--red)}
+.toast.info{background:var(--blue-bg);border:1px solid #93c5fd;color:var(--blue)}
 </style>
 </head>
 <body>
-<div id="root"></div>
-<script type="text/babel">
-const {useState,useMemo,useCallback,useRef,useEffect}=React;
-
-/* ═══ DEMO ═══ */
+<div class="wrap" id="app"></div>
+<script>
+/* ══════════════════════════════════════════════════════
+   STATE
+   ══════════════════════════════════════════════════════ */
 const DEMO_AREAS=[
   {id:"A1",name:"Участок №1 — Сухие смеси",fixedCost:820000},
   {id:"A2",name:"Участок №2 — Жидкие формы",fixedCost:1150000},
@@ -46,7 +142,7 @@ const DEMO_GP=[
   {tovId:"GP03",areaId:"A2"},{tovId:"GP04",areaId:"A2"},
   {tovId:"GP05",areaId:"A3"},
 ];
-const DS=[
+const DEMO_SHIPS=[
   {orderId:"Z001",date:"2025-12-05",client:"ООО «Агротех»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4200,revenue:2800000,rawCost:1120000,normCost:280000,transport:85000},
   {orderId:"Z002",date:"2025-12-08",client:"АО «ФудМастер»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4600,revenue:3100000,rawCost:1240000,normCost:310000,transport:62000},
   {orderId:"Z003",date:"2025-12-10",client:"ТОО «КазПром»",gpGroup:"Премиум линейка",gpName:"Смесь Бета 10кг",gpId:"GP01",qty:2200,revenue:1500000,rawCost:600000,normCost:150000,transport:120000},
@@ -64,425 +160,378 @@ const DS=[
   {orderId:"Z015",date:"2026-01-20",client:"ИП Ким",gpGroup:"Фасованная продукция",gpName:"Фасовка 1кг",gpId:"GP05",qty:3800,revenue:950000,rawCost:475000,normCost:76000,transport:72000},
 ];
 
-/* ═══ HELPERS ═══ */
-const fmt=n=>{if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+"М";if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+"К";return n.toFixed(0)};
-const fmtF=n=>n.toLocaleString("ru-RU",{maximumFractionDigits:0})+" ₽";
-const pct=n=>(n*100).toFixed(1)+"%";
-const parseNum=v=>{if(v==null||v==='')return 0;let s=String(v).trim().replace(/\s/g,'').replace(/,/g,'.');const n=parseFloat(s);return isNaN(n)?0:n};
-const detectDelim=t=>{const l=t.split(/\r?\n/)[0]||'';if(l.includes('\t'))return'\t';if(l.includes(';'))return';';return','};
-const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-const fmtDate=s=>{if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()};
+let S={
+  areas:DEMO_AREAS, gpArea:DEMO_GP, allShips:DEMO_SHIPS,
+  sqlOk:false, areaOk:false,
+  offA:new Set(), offG:new Set(), offC:new Set(),
+  tab:'overview', scOpen:true,
+  dateFrom:'', dateTo:'',
+  searchG:'', searchC:'',
+};
 
-/* ═══ COMPONENTS ═══ */
-const S={mono:{fontFamily:'var(--mono)'},td:{padding:'10px 14px',verticalAlign:'middle'}};
+/* ══════ HELPERS ══════ */
+const fmt=n=>{if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+'М';if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+'К';return Math.round(n).toString()};
+const fmtF=n=>n.toLocaleString('ru-RU',{maximumFractionDigits:0})+' ₽';
+const pct=n=>(n*100).toFixed(1)+'%';
+const parseNum=v=>{if(v==null||v==='')return 0;let s=String(v).trim().replace(/\s/g,'').replace(/,/g,'.');return parseFloat(s)||0};
+const detectDelim=t=>{const l=(t.split(/\r?\n/)[0])||'';if(l.includes('\t'))return'\t';if(l.includes(';'))return';';return','};
+const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const accents=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#ec4899','#14b8a6','#6366f1'];
 
-function Chip({active,onClick,children,accent='var(--blue)'}){
-  return <button onClick={onClick} style={{
-    padding:'4px 12px',borderRadius:16,cursor:'pointer',fontSize:12,fontFamily:'var(--sans)',fontWeight:500,
-    transition:'all .2s',display:'inline-flex',alignItems:'center',gap:5,whiteSpace:'nowrap',lineHeight:'20px',
-    background:active?accent:'#f3f4f6',color:active?'#fff':'#9ca3af',
-    border:active?'1.5px solid transparent':'1.5px solid #e5e7eb',
-    textDecoration:active?'none':'line-through',opacity:active?1:.65,
-  }}>{children}</button>
+function tog(set,id){set.has(id)?set.delete(id):set.add(id)}
+
+/* Date-filtered ships */
+function getShips(){
+  let d=S.allShips;
+  if(S.dateFrom){const f=S.dateFrom;d=d.filter(s=>s.date>=f)}
+  if(S.dateTo){const t=S.dateTo;d=d.filter(s=>s.date<=t)}
+  return d;
+}
+function getGroups(ships){
+  const m=new Map();
+  ships.forEach(s=>{if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});m.get(s.gpGroup).gpIds.add(s.gpId)});
+  return[...m.values()];
+}
+function getClients(ships){return[...new Set(ships.map(s=>s.client))].sort()}
+function gpaMap(){const m=new Map();S.gpArea.forEach(g=>m.set(String(g.tovId),g.areaId));return m}
+function g2aMap(groups,gpa){
+  const m=new Map();groups.forEach(g=>{const ids=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(ids.length)m.set(g.id,ids[0])});return m;
+}
+function effOff(groups,g2a){
+  const s=new Set(S.offG);groups.forEach(g=>{const a=g2a.get(g.id);if(a&&S.offA.has(a))s.add(g.id)});return s;
+}
+function calcM(ships,gpa,g2a){
+  const rev=ships.reduce((a,s)=>a+s.revenue,0),vc=ships.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0),cm1=rev-vc;
+  const aa=new Set();ships.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)aa.add(a)});
+  const fc=S.areas.filter(a=>aa.has(a.id)).reduce((x,a)=>x+a.fixedCost,0);
+  return{rev,vc,cm1,cm2:cm1-fc,fc,m1:rev>0?cm1/rev:0,m2:rev>0?(cm1-fc)/rev:0};
 }
 
-function KPI({label,value,sub,delta,warn}){
-  return <div style={{background:warn?'var(--red-bg)':'var(--card)',border:warn?'1px solid #fecaca':'1px solid var(--border)',
-    borderRadius:12,padding:'16px 20px',flex:'1 1 180px',minWidth:160,boxShadow:'var(--shadow)'}}>
-    <div style={{fontSize:11,color:'var(--text3)',fontWeight:600,textTransform:'uppercase',letterSpacing:1,marginBottom:6,...S.mono}}>{label}</div>
-    <div style={{fontSize:24,fontWeight:700,color:warn?'var(--red)':'var(--text)',letterSpacing:-.5}}>{value}</div>
-    {sub&&<div style={{fontSize:12,color:'var(--text3)',marginTop:2,...S.mono}}>{sub}</div>}
-    {delta!==undefined&&<div style={{fontSize:11,marginTop:6,...S.mono,display:'inline-flex',alignItems:'center',gap:3,
-      padding:'2px 8px',borderRadius:8,fontWeight:500,
-      color:delta>=0?'var(--green)':'var(--red)',background:delta>=0?'var(--green-bg)':'var(--red-bg)',
-    }}>{delta>=0?'↑':'↓'} {fmtF(Math.abs(delta))}</div>}
-  </div>
-}
-
-function Bar({value,max,color,w=140}){
+function bar(value,max,color,w){
   const r=max>0?Math.min(Math.abs(value)/max,1):0;
-  return <div style={{width:w,height:10,background:'#f3f4f6',borderRadius:5,overflow:'hidden',flexShrink:0}}>
-    <div style={{width:`${r*100}%`,height:'100%',borderRadius:5,background:value<0?'#fca5a5':color,transition:'width .4s'}}/>
-  </div>
+  return`<div class="bar-wrap" style="width:${w||140}px"><div class="bar-fill" style="width:${r*100}%;background:${value<0?'#fca5a5':color}"></div></div>`;
+}
+function badge(val){
+  const bg=val>.3?'var(--green-bg)':val>.15?'var(--amber-bg)':'var(--red-bg)';
+  const c=val>.3?'var(--green)':val>.15?'var(--amber)':'var(--red)';
+  return`<span class="badge-pct" style="background:${bg};color:${c}">${pct(val)}</span>`;
 }
 
-function Badge({val}){
-  const c=val>.3?{bg:'var(--green-bg)',c:'var(--green)'}:val>.15?{bg:'var(--amber-bg)',c:'var(--amber)'}:{bg:'var(--red-bg)',c:'var(--red)'};
-  return <span style={{padding:'2px 8px',borderRadius:8,fontSize:11,...S.mono,fontWeight:500,background:c.bg,color:c.c}}>{pct(val)}</span>
+/* Toast */
+let toastTimer;
+function toast(msg,type){
+  let el=document.getElementById('toast');
+  if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el)}
+  el.className='toast '+(type||'info');el.textContent=msg;
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.remove(),5000);
 }
 
-function FileBtn({label,accept,onLoad,loaded}){
-  const ref=useRef();
-  return <button onClick={()=>ref.current?.click()} style={{
-    padding:'6px 14px',borderRadius:8,cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)',
-    background:loaded?'var(--green-bg)':'var(--card)',border:loaded?'1px solid var(--green)':'1px solid var(--border)',
-    color:loaded?'var(--green)':'var(--text2)',transition:'all .2s',display:'inline-flex',alignItems:'center',gap:4,
-  }}>{loaded?'✓':'↑'} {label}<input ref={ref} type="file" accept={accept} style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f)onLoad(f)}}/></button>
+/* ══════ FILE LOADERS ══════ */
+function mapRows(data){
+  return data.map(r=>{
+    const g=(...ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()}return null};
+    return{
+      orderId:g("Код заявки","Код_заявки","ORDER_ID")||"",
+      date:g("Дата заявки (отгрузки)","Дата_заявки","Order_Date","orderDate")||"",
+      client:g("Клиент","Client_Name","Клиент ")||"",
+      gpGroup:g("Товарная группа","Товарная_группа","GP_Group")||"",
+      gpName:g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name")||"",
+      gpId:String(g("Код_ГП","Код ГП","GP_ID","TOV_ID")||""),
+      qty:parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","GP_Qty")),
+      revenue:parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Revenue_RUR")),
+      rawCost:parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад")),
+      normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех")),
+      transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт")),
+    };
+  }).filter(r=>r.revenue>0);
 }
 
-function Toast({msg,type,onClose}){
-  useEffect(()=>{const t=setTimeout(onClose,5000);return()=>clearTimeout(t)},[onClose]);
-  const bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'}[type]||'var(--blue-bg)';
-  const bc={ok:'#86efac',err:'#fca5a5',info:'#93c5fd'}[type]||'#93c5fd';
-  const c={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'}[type]||'var(--blue)';
-  return <div className="fu" style={{position:'fixed',top:16,right:16,padding:'10px 18px',borderRadius:10,fontSize:13,
-    fontFamily:'var(--sans)',zIndex:999,maxWidth:460,lineHeight:1.5,background:bg,border:`1px solid ${bc}`,color:c,boxShadow:'var(--shadow2)'}}>{msg}</div>
+function normalizeDate(d){
+  if(!d)return'';
+  /* Handle dd.mm.yyyy, yyyy-mm-dd, mm/dd/yyyy */
+  if(/^\d{2}\.\d{2}\.\d{4}/.test(d)){const p=d.split('.');return p[2]+'-'+p[1]+'-'+p[0]}
+  if(/^\d{4}-\d{2}-\d{2}/.test(d))return d.slice(0,10);
+  const dt=new Date(d);if(!isNaN(dt))return dt.toISOString().slice(0,10);
+  return'';
 }
 
-/* ═══ DASHBOARD ═══ */
-function App(){
-  const [areas,setAreas]=useState(DEMO_AREAS);
-  const [gpArea,setGpArea]=useState(DEMO_GP);
-  const [ships,setShips]=useState(DS);
-  const [sqlOk,setSqlOk]=useState(false);
-  const [areaOk,setAreaOk]=useState(false);
-  const [offA,setOffA]=useState(new Set());
-  const [offG,setOffG]=useState(new Set());
-  const [offC,setOffC]=useState(new Set());
-  const [tab,setTab]=useState('overview');
-  const [toast,setToast]=useState(null);
-  const [scenarioOpen,setScenarioOpen]=useState(true);
-  const [searchC,setSearchC]=useState('');
-  const [searchG,setSearchG]=useState('');
-
-  const notify=(m,t='info')=>setToast({msg:m,type:t,key:Date.now()});
-  const tog=useCallback((s,fn,id)=>fn(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n}),[]);
-
-  /* Period from data */
-  const period=useMemo(()=>{
-    const dates=ships.map(s=>s.date).filter(Boolean).sort();
-    if(!dates.length)return{from:'',to:'',label:'Нет данных'};
-    return{from:dates[0],to:dates[dates.length-1],label:fmtDate(dates[0])+' — '+fmtDate(dates[dates.length-1])};
-  },[ships]);
-
-  /* File loaders */
-  function mapRows(data){
-    return data.map(r=>{
-      const g=(...ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()}return null};
-      return{
-        orderId:g("Код заявки","Код_заявки","ORDER_ID")||"",
-        date:g("Дата заявки (отгрузки)","Дата_заявки","Order_Date","orderDate")||"",
-        client:g("Клиент","Client_Name","Клиент ")||"",
-        gpGroup:g("Товарная группа","Товарная_группа","GP_Group")||"",
-        gpName:g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name")||"",
-        gpId:String(g("Код_ГП","Код ГП","GP_ID","TOV_ID")||""),
-        qty:parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","GP_Qty")),
-        revenue:parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Revenue_RUR")),
-        rawCost:parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад")),
-        normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех")),
-        transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт")),
-      };
-    }).filter(r=>r.revenue>0);
-  }
-
-  const loadSQL=useCallback(file=>{
-    const ext=file.name.split('.').pop().toLowerCase();
-    if(ext==='xlsx'||ext==='xls'){
-      const rd=new FileReader();rd.onload=e=>{try{
-        const wb=XLSX.read(e.target.result,{type:'array'});
-        const rows=mapRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
-        if(rows.length){setShips(rows);setSqlOk(true);setOffA(new Set());setOffG(new Set());setOffC(new Set());
-          notify(`✓ ${rows.length} строк из Excel`,'ok')}
-        else notify('Строк с выручкой > 0 не найдено','err');
-      }catch(err){notify('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);return;
-    }
-    const tryEnc=enc=>{const rd=new FileReader();rd.onload=e=>{
-      let txt=e.target.result;if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);
-      const d=detectDelim(txt);const p=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:d});
-      if(!p.data?.length){if(enc==='UTF-8')tryEnc('windows-1251');else notify('Не удалось прочитать','err');return}
-      const rows=mapRows(p.data);
-      if(rows.length){setShips(rows);setSqlOk(true);setOffA(new Set());setOffG(new Set());setOffC(new Set());
-        notify(`✓ ${rows.length} строк (${d==='\t'?'TAB':d})`,'ok')}
-      else{if(enc==='UTF-8')tryEnc('windows-1251');
-        else{const c=(p.meta?.fields||[]).slice(0,4).join(', ');notify(`Колонки не совпали. Найдены: ${c}...`,'err')}}
-    };rd.readAsText(file,enc)};tryEnc('UTF-8');
-  },[]);
-
-  const loadAreas=useCallback(file=>{
+function loadSQL(file){
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='xlsx'||ext==='xls'){
     const rd=new FileReader();rd.onload=e=>{try{
-      const wb=XLSX.read(e.target.result,{type:'array'});
-      const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
-        id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
-        name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
-        fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
-      })).filter(a=>a.id);
-      let mp=[];
-      if(wb.SheetNames.length>1)mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
-        tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||""),
-        areaId:String(r["Код_участка"]||r["Код участка"]||""),
-      })).filter(m=>m.tovId&&m.areaId);
-      if(a.length){setAreas(a);if(mp.length)setGpArea(mp);setAreaOk(true);setOffA(new Set());
-        notify(`✓ ${a.length} участков, ${mp.length} привязок`,'ok')}
-      else notify('Не найдены участки','err');
-    }catch(err){notify('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);
-  },[]);
+      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
+      const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false});
+      const rows=mapRows(data);rows.forEach(r=>r.date=normalizeDate(r.date));
+      if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();
+        autoSetDates();render();toast('✓ '+rows.length+' строк из Excel','ok')}
+      else toast('Строк с выручкой > 0 не найдено','err');
+    }catch(err){toast('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);return;
+  }
+  const tryEnc=enc=>{const rd=new FileReader();rd.onload=e=>{
+    let txt=e.target.result;if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);
+    const dl=detectDelim(txt);const p=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:dl});
+    if(!p.data?.length){if(enc==='UTF-8')tryEnc('windows-1251');else toast('Не удалось прочитать','err');return}
+    const rows=mapRows(p.data);rows.forEach(r=>r.date=normalizeDate(r.date));
+    if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();
+      autoSetDates();render();toast('✓ '+rows.length+' строк','ok')}
+    else{if(enc==='UTF-8')tryEnc('windows-1251');
+      else{const c=(p.meta?.fields||[]).slice(0,4).join(', ');toast('Колонки не совпали: '+c,'err')}}
+  };rd.readAsText(file,enc)};tryEnc('UTF-8');
+}
 
-  /* ═══ DERIVED ═══ */
-  const allGroups=useMemo(()=>{const m=new Map();ships.forEach(s=>{if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});m.get(s.gpGroup).gpIds.add(s.gpId)});return[...m.values()]},[ships]);
-  const allClients=useMemo(()=>[...new Set(ships.map(s=>s.client))].sort(),[ships]);
-  const gpa=useMemo(()=>{const m=new Map();gpArea.forEach(g=>m.set(String(g.tovId),g.areaId));return m},[gpArea]);
-  const g2a=useMemo(()=>{const m=new Map();allGroups.forEach(g=>{const ids=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(ids.length)m.set(g.id,ids[0])});return m},[allGroups,gpa]);
-  const eog=useMemo(()=>{const s=new Set(offG);allGroups.forEach(g=>{const a=g2a.get(g.id);if(a&&offA.has(a))s.add(g.id)});return s},[offA,offG,allGroups,g2a]);
-  const active=useMemo(()=>ships.filter(s=>!eog.has(s.gpGroup)&&!offC.has(s.client)),[ships,eog,offC]);
+function loadAreas(file){
+  const rd=new FileReader();rd.onload=e=>{try{
+    const wb=XLSX.read(e.target.result,{type:'array'});
+    const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
+      id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
+      name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
+      fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
+    })).filter(a=>a.id);
+    let mp=[];
+    if(wb.SheetNames.length>1)mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
+      tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||""),
+      areaId:String(r["Код_участка"]||r["Код участка"]||""),
+    })).filter(m=>m.tovId&&m.areaId);
+    if(a.length){S.areas=a;if(mp.length)S.gpArea=mp;S.areaOk=true;S.offA=new Set();
+      render();toast('✓ '+a.length+' участков','ok')}
+    else toast('Участки не найдены','err');
+  }catch(err){toast('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);
+}
 
-  const calc=useCallback(sh=>{
-    const rev=sh.reduce((a,s)=>a+s.revenue,0),vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0),cm1=rev-vc;
-    const aa=new Set();sh.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)aa.add(a)});
-    const fc=areas.filter(a=>aa.has(a.id)).reduce((x,a)=>x+a.fixedCost,0);
-    return{rev,vc,cm1,cm2:cm1-fc,fc,m1:rev>0?cm1/rev:0,m2:rev>0?(cm1-fc)/rev:0};
-  },[areas,gpa,g2a]);
+function autoSetDates(){
+  const dates=S.allShips.map(s=>s.date).filter(Boolean).sort();
+  if(dates.length){S.dateFrom=dates[0];S.dateTo=dates[dates.length-1]}
+}
+autoSetDates();
 
-  const base=useMemo(()=>calc(ships),[calc,ships]);
-  const cur=useMemo(()=>calc(active),[calc,active]);
-  const changed=offA.size>0||offG.size>0||offC.size>0;
+/* ══════════════════════════════════════════════════════
+   RENDER
+   ══════════════════════════════════════════════════════ */
+function render(){
+  const ships=getShips();
+  const groups=getGroups(ships);
+  const clients=getClients(ships);
+  const gpa_m=gpaMap();
+  const g2a_m=g2aMap(groups,gpa_m);
+  const eog=effOff(groups,g2a_m);
+  const active=ships.filter(s=>!eog.has(s.gpGroup)&&!S.offC.has(s.client));
+  const base=calcM(ships,gpa_m,g2a_m);
+  const cur=calcM(active,gpa_m,g2a_m);
+  const changed=S.offA.size>0||S.offG.size>0||S.offC.size>0;
+  const disN=S.offA.size+S.offG.size+S.offC.size;
 
-  const gStats=useMemo(()=>allGroups.map(g=>{
-    const sh=active.filter(s=>s.gpGroup===g.id);const rev=sh.reduce((a,s)=>a+s.revenue,0);const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    const aId=g2a.get(g.id);const area=areas.find(a=>a.id===aId);
-    return{...g,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,areaName:area?.name||"—",off:eog.has(g.id)};
-  }).sort((a,b)=>b.rev-a.rev),[allGroups,active,g2a,areas,eog]);
+  /* Stats */
+  const gStats=groups.map(g=>{
+    const sh=active.filter(s=>s.gpGroup===g.id);const rev=sh.reduce((a,s)=>a+s.revenue,0);
+    const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
+    const aId=g2a_m.get(g.id);const area=S.areas.find(a=>a.id===aId);
+    return{...g,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,areaName:area?.name||'—',off:eog.has(g.id)};
+  }).sort((a,b)=>b.rev-a.rev);
 
-  const cStats=useMemo(()=>allClients.map(c=>{
-    const sh=active.filter(s=>s.client===c);const rev=sh.reduce((a,s)=>a+s.revenue,0);const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:offC.has(c)};
-  }).sort((a,b)=>b.rev-a.rev),[allClients,active,offC]);
+  const cStats=clients.map(c=>{
+    const sh=active.filter(s=>s.client===c);const rev=sh.reduce((a,s)=>a+s.revenue,0);
+    const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
+    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,
+      groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:S.offC.has(c)};
+  }).sort((a,b)=>b.rev-a.rev);
 
-  const aStats=useMemo(()=>areas.map(a=>{
-    const gIds=gpArea.filter(m=>m.areaId===a.id).map(m=>String(m.tovId));
-    const gNames=new Set();allGroups.forEach(g=>{if(g2a.get(g.id)===a.id)gNames.add(g.id)});
-    const sh=active.filter(s=>gIds.includes(String(s.gpId))||gNames.has(s.gpGroup));
+  const aStats=S.areas.map(a=>{
+    const gIds=S.gpArea.filter(m=>m.areaId===a.id).map(m=>String(m.tovId));
+    const gN=new Set();groups.forEach(g=>{if(g2a_m.get(g.id)===a.id)gN.add(g.id)});
+    const sh=active.filter(s=>gIds.includes(String(s.gpId))||gN.has(s.gpGroup));
     const rev=sh.reduce((x,s)=>x+s.revenue,0);const vc=sh.reduce((x,s)=>x+s.rawCost+s.normCost+s.transport,0);
-    return{...a,rev,vc,cm1:rev-vc,cm2:rev-vc-a.fixedCost,on:!offA.has(a.id),cnt:sh.length};
-  }),[areas,gpArea,active,allGroups,g2a,offA]);
+    return{...a,rev,vc,cm1:rev-vc,cm2:rev-vc-a.fixedCost,on:!S.offA.has(a.id),cnt:sh.length};
+  });
 
   const maxGR=Math.max(...gStats.map(g=>g.rev),1);
   const maxCR=Math.max(...cStats.map(c=>c.rev),1);
 
-  /* Filtered chips */
-  const filteredClients=useMemo(()=>{
-    if(!searchC)return allClients;
-    const q=searchC.toLowerCase();return allClients.filter(c=>c.toLowerCase().includes(q));
-  },[allClients,searchC]);
-  const filteredGroups=useMemo(()=>{
-    if(!searchG)return allGroups;
-    const q=searchG.toLowerCase();return allGroups.filter(g=>g.name.toLowerCase().includes(q));
-  },[allGroups,searchG]);
+  /* Filter chips */
+  const fGroups=S.searchG?groups.filter(g=>g.name.toLowerCase().includes(S.searchG.toLowerCase())):groups;
+  const fClients=S.searchC?clients.filter(c=>c.toLowerCase().includes(S.searchC.toLowerCase())):clients;
 
-  const disabledCount=offA.size+offG.size+offC.size;
-  const accents=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#ec4899','#14b8a6','#6366f1'];
+  /* KPI helper */
+  function kpi(label,val,sub,delta,warn){
+    let h=`<div class="kpi${warn?' warn':''}"><div class="kpi-label">${label}</div>
+      <div class="kpi-val" style="color:${warn?'var(--red)':'var(--tx)'}">${val}</div>`;
+    if(sub)h+=`<div class="kpi-sub">${sub}</div>`;
+    if(delta!==undefined)h+=`<div class="kpi-delta ${delta>=0?'up':'down'}">${delta>=0?'↑':'↓'} ${fmtF(Math.abs(delta))}</div>`;
+    return h+'</div>';
+  }
 
-  const tabStyle=t=>({
-    padding:'8px 20px',borderRadius:8,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,fontFamily:'var(--sans)',
-    transition:'all .15s',background:tab===t?'var(--text)':'transparent',color:tab===t?'#fff':'var(--text3)',
-  });
+  let html='';
 
-  const inputStyle={padding:'5px 10px',borderRadius:8,border:'1px solid var(--border)',fontSize:12,fontFamily:'var(--sans)',
-    outline:'none',width:160,background:'#f9fafb',color:'var(--text)'};
-
-  const thS={padding:'10px 14px',textAlign:'left',color:'var(--text3)',fontSize:11,fontWeight:600,
-    textTransform:'uppercase',letterSpacing:.8,fontFamily:'var(--sans)',background:'#fafbfc',
-    borderBottom:'2px solid var(--border)',position:'sticky',top:0,zIndex:1};
-  const tdS={padding:'10px 14px',borderBottom:'1px solid var(--border2)'};
-
-  return <div style={{maxWidth:1400,margin:'0 auto',padding:'24px 28px'}}>
-    {toast&&<Toast key={toast.key} msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
-
-    {/* ── HEADER ── */}
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:12}}>
-      <div style={{display:'flex',alignItems:'baseline',gap:16,flexWrap:'wrap'}}>
-        <h1 style={{fontSize:22,fontWeight:700,letterSpacing:-.3}}>Портфельный анализ</h1>
-        <span style={{fontSize:13,color:'var(--text3)',...S.mono,background:'#f3f4f6',padding:'4px 12px',borderRadius:8}}>
-          {period.label}
-        </span>
-      </div>
-      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
-        <FileBtn label="SQL данные" accept=".csv,.tsv,.txt,.xlsx,.xls" onLoad={loadSQL} loaded={sqlOk}/>
-        <FileBtn label="Участки (.xlsx)" accept=".xlsx,.xls" onLoad={loadAreas} loaded={areaOk}/>
-      </div>
+  /* Header */
+  html+=`<div class="header">
+    <h1>Портфельный анализ</h1>
+    <div class="file-btns">
+      <label class="file-btn${S.sqlOk?' ok':''}"><span>${S.sqlOk?'✓':'↑'} SQL данные</span><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" id="fSQL"></label>
+      <label class="file-btn${S.areaOk?' ok':''}"><span>${S.areaOk?'✓':'↑'} Участки (.xlsx)</span><input type="file" accept=".xlsx,.xls" id="fArea"></label>
     </div>
+  </div>`;
 
-    {/* ── TABS ── */}
-    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:12}}>
-      <div style={{display:'flex',gap:2,background:'#edeef2',borderRadius:10,padding:3}}>
-        {[['overview','Обзор'],['groups','Группы'],['clients','Клиенты'],['areas','Участки']].map(([k,l])=>
-          <button key={k} style={tabStyle(k)} onClick={()=>setTab(k)}>{l}</button>)}
-      </div>
-      <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        {changed&&<span style={{fontSize:12,...S.mono,color:'var(--red)',background:'var(--red-bg)',
-          padding:'3px 10px',borderRadius:8}}>{disabledCount} отключено</span>}
-        <button onClick={()=>setScenarioOpen(p=>!p)} style={{
-          padding:'6px 14px',borderRadius:8,border:'1px solid var(--border)',background:'var(--card)',
-          cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)',color:'var(--text2)',
-        }}>{scenarioOpen?'▴ Скрыть сценарий':'▾ Настроить сценарий'}</button>
-      </div>
+  /* Period */
+  html+=`<div class="period-bar">
+    <label>Период:</label>
+    <input type="date" id="dFrom" value="${S.dateFrom}">
+    <span style="color:var(--tx3)">—</span>
+    <input type="date" id="dTo" value="${S.dateTo}">
+    <span class="period-info">${ships.length} записей в периоде</span>
+  </div>`;
+
+  /* Tabs + controls */
+  html+=`<div class="nav">
+    <div class="tabs">
+      ${['overview|Обзор','groups|Группы','clients|Клиенты','areas|Участки'].map(t=>{
+        const[k,l]=t.split('|');return`<button class="tab${S.tab===k?' on':''}" data-tab="${k}">${l}</button>`}).join('')}
     </div>
-
-    {/* ── SCENARIO ── */}
-    {scenarioOpen&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,
-      padding:16,marginBottom:20,boxShadow:'var(--shadow)'}}>
-      {/* Areas */}
-      <div style={{marginBottom:12}}>
-        <div style={{fontSize:11,fontWeight:600,color:'var(--text3)',marginBottom:8,textTransform:'uppercase',letterSpacing:.5}}>Участки</div>
-        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
-          {areas.map((a,i)=><Chip key={a.id} active={!offA.has(a.id)} onClick={()=>tog(offA,setOffA,a.id)}
-            accent={accents[i%accents.length]}>{a.name}</Chip>)}
-        </div>
-      </div>
-      {/* Groups */}
-      <div style={{marginBottom:12}}>
-        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
-          <span style={{fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>Товарные группы</span>
-          {allGroups.length>8&&<input placeholder="Поиск…" value={searchG} onChange={e=>setSearchG(e.target.value)} style={inputStyle}/>}
-          {offG.size>0&&<button onClick={()=>setOffG(new Set())} style={{fontSize:11,color:'var(--blue)',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--sans)'}}>Включить все</button>}
-        </div>
-        <div style={{display:'flex',gap:5,flexWrap:'wrap',maxHeight:120,overflowY:'auto',paddingRight:4}}>
-          {filteredGroups.map(g=><Chip key={g.id} active={!eog.has(g.id)} onClick={()=>tog(offG,setOffG,g.id)}
-            accent="var(--blue)">{g.name}</Chip>)}
-        </div>
-      </div>
-      {/* Clients */}
-      <div>
-        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
-          <span style={{fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>Клиенты</span>
-          {allClients.length>8&&<input placeholder="Поиск…" value={searchC} onChange={e=>setSearchC(e.target.value)} style={inputStyle}/>}
-          {offC.size>0&&<button onClick={()=>setOffC(new Set())} style={{fontSize:11,color:'var(--green)',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--sans)'}}>Включить все</button>}
-        </div>
-        <div style={{display:'flex',gap:5,flexWrap:'wrap',maxHeight:120,overflowY:'auto',paddingRight:4}}>
-          {filteredClients.map(c=><Chip key={c} active={!offC.has(c)} onClick={()=>tog(offC,setOffC,c)}
-            accent="var(--green)">{c}</Chip>)}
-        </div>
-      </div>
-      {changed&&<div style={{marginTop:12,borderTop:'1px solid var(--border2)',paddingTop:10}}>
-        <button onClick={()=>{setOffA(new Set());setOffG(new Set());setOffC(new Set())}}
-          style={{padding:'5px 14px',borderRadius:8,border:'1px solid #fecaca',background:'var(--card)',
-            color:'var(--red)',cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)'}}>
-          ↺ Сбросить всё
-        </button>
-      </div>}
-    </div>}
-
-    {/* ── KPI ── */}
-    <div className="fu" style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
-      <KPI label="Выручка" value={fmt(cur.rev)+" ₽"} delta={changed?cur.rev-base.rev:undefined}/>
-      <KPI label="Маржа 1" value={fmt(cur.cm1)+" ₽"} sub={pct(cur.m1)} delta={changed?cur.cm1-base.cm1:undefined}/>
-      <KPI label="Пост. затраты" value={fmt(cur.fc)+" ₽"} delta={changed?cur.fc-base.fc:undefined}/>
-      <KPI label="Маржа 2" value={fmt(cur.cm2)+" ₽"} sub={pct(cur.m2)} delta={changed?cur.cm2-base.cm2:undefined} warn={cur.cm2<0}/>
+    <div class="nav-right">
+      ${changed?`<span class="badge-count">${disN} отключено</span>`:''}
+      <button class="toggle-sc" id="toggleSc">${S.scOpen?'▴ Скрыть сценарий':'▾ Настроить сценарий'}</button>
     </div>
+  </div>`;
 
-    {/* ── IMPACT ── */}
-    {changed&&<div className="fu" style={{
-      background:cur.cm2>=base.cm2?'var(--green-bg)':'var(--red-bg)',
-      border:`1px solid ${cur.cm2>=base.cm2?'#86efac':'#fecaca'}`,
-      borderRadius:12,padding:'14px 20px',marginBottom:20,fontSize:13,lineHeight:1.6}}>
-      <strong style={{color:cur.cm2>=base.cm2?'var(--green)':'var(--red)'}}>
-        {cur.cm2>=base.cm2?'✓ Сценарий улучшает':'⚠ Сценарий ухудшает'}
-      </strong>{' '}итоговую маржу на <strong style={S.mono}>{fmtF(Math.abs(cur.cm2-base.cm2))}</strong>
-      {cur.cm2<base.cm2&&cur.fc<base.fc&&<div style={{marginTop:4,color:'var(--amber)'}}>⚡ Постоянные снизились на {fmtF(base.fc-cur.fc)}, но потеря маржи 1 перевесила экономию</div>}
-      {cur.cm2>=base.cm2&&<div style={{marginTop:4,color:'#047857'}}>Экономия: {fmtF(base.fc-cur.fc)} · Δ маржи 1: {fmtF(cur.cm1-base.cm1)}</div>}
-    </div>}
+  /* Scenario */
+  if(S.scOpen){
+    html+=`<div class="sc-panel fu">`;
+    /* Areas */
+    html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Участки</span></div>
+      <div class="sc-chips">${S.areas.map((a,i)=>`<button class="chip ${S.offA.has(a.id)?'off':'on'}" style="${S.offA.has(a.id)?'':`background:${accents[i%accents.length]}`}" data-tA="${a.id}">${esc(a.name)}</button>`).join('')}</div></div>`;
+    /* Groups */
+    html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Товарные группы</span>
+      ${groups.length>8?`<input class="sc-search" placeholder="Поиск…" id="sG" value="${esc(S.searchG)}">`:''}
+      ${S.offG.size>0?'<button class="sc-enableall" id="enG">Включить все</button>':''}</div>
+      <div class="sc-chips">${fGroups.map(g=>`<button class="chip ${eog.has(g.id)?'off':'on'}" style="${eog.has(g.id)?'':'background:var(--blue)'}" data-tG="${esc(g.id)}">${esc(g.name)}</button>`).join('')}</div></div>`;
+    /* Clients */
+    html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Клиенты</span>
+      ${clients.length>8?`<input class="sc-search" placeholder="Поиск…" id="sC" value="${esc(S.searchC)}">`:''}
+      ${S.offC.size>0?'<button class="sc-enableall" id="enC" style="color:var(--green)">Включить все</button>':''}</div>
+      <div class="sc-chips">${fClients.map(c=>`<button class="chip ${S.offC.has(c)?'off':'on'}" style="${S.offC.has(c)?'':'background:var(--green)'}" data-tC="${esc(c)}">${esc(c)}</button>`).join('')}</div></div>`;
+    if(changed)html+=`<div class="sc-reset"><button id="resetAll">↺ Сбросить всё</button></div>`;
+    html+=`</div>`;
+  }
 
-    {/* ═══ TAB CONTENT ═══ */}
+  /* KPIs */
+  html+=`<div class="kpi-row fu">
+    ${kpi('Выручка',fmt(cur.rev)+' ₽',null,changed?cur.rev-base.rev:undefined)}
+    ${kpi('Маржа 1',fmt(cur.cm1)+' ₽',pct(cur.m1),changed?cur.cm1-base.cm1:undefined)}
+    ${kpi('Пост. затраты',fmt(cur.fc)+' ₽',null,changed?cur.fc-base.fc:undefined)}
+    ${kpi('Маржа 2',fmt(cur.cm2)+' ₽',pct(cur.m2),changed?cur.cm2-base.cm2:undefined,cur.cm2<0)}
+  </div>`;
 
-    {tab==='overview'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:20,boxShadow:'var(--shadow)'}}>
-      <h3 style={{fontSize:15,fontWeight:700,marginBottom:16}}>Ступенчатый P&L</h3>
-      {[
-        {l:'Выручка',v:cur.rev,c:'var(--blue)'},
-        {l:'— Сырьё',v:-active.reduce((a,s)=>a+s.rawCost,0),c:'var(--red)'},
-        {l:'— Нормативы цеха',v:-active.reduce((a,s)=>a+s.normCost,0),c:'var(--amber)'},
-        {l:'— Транспорт',v:-active.reduce((a,s)=>a+s.transport,0),c:'#eab308'},
-        {l:'= Маржа 1',v:cur.cm1,c:'var(--green)',bold:true},
-        {l:'— Пост. затраты участков',v:-cur.fc,c:'var(--purple)'},
-        {l:'= Маржа 2',v:cur.cm2,c:cur.cm2>=0?'var(--teal)':'var(--red)',bold:true},
-      ].map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'9px 0',
-        borderBottom:r.bold?'2px solid var(--border)':'1px solid var(--border2)'}}>
-        <div style={{width:240,fontSize:13,color:r.bold?'var(--text)':'var(--text2)',fontWeight:r.bold?700:400}}>{r.l}</div>
-        <Bar value={r.v} max={cur.rev} color={r.c} w={240}/>
-        <div style={{...S.mono,fontSize:13,color:r.v<0?'var(--red)':'var(--text)',minWidth:130,textAlign:'right',fontWeight:r.bold?700:400}}>{fmtF(r.v)}</div>
-      </div>)}
-    </div>}
+  /* Impact */
+  if(changed){
+    const good=cur.cm2>=base.cm2;
+    html+=`<div class="impact fu ${good?'good':'bad'}">
+      <strong style="color:${good?'var(--green)':'var(--red)'}">${good?'✓ Улучшает':'⚠ Ухудшает'}</strong>
+      итоговую маржу на <strong style="font-family:var(--mono)">${fmtF(Math.abs(cur.cm2-base.cm2))}</strong>
+      ${!good&&cur.fc<base.fc?`<div style="margin-top:4px;color:var(--amber)">⚡ Постоянные −${fmtF(base.fc-cur.fc)}, но потеря маржи 1 перевесила</div>`:''}
+      ${good?`<div style="margin-top:4px;color:#047857">Экономия: ${fmtF(base.fc-cur.fc)} · Δ маржи 1: ${fmtF(cur.cm1-base.cm1)}</div>`:''}
+    </div>`;
+  }
 
-    {tab==='groups'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,boxShadow:'var(--shadow)',overflow:'hidden'}}>
-      <div style={{padding:'16px 20px 0'}}>
-        <h3 style={{fontSize:15,fontWeight:700,marginBottom:4}}>Товарные группы</h3>
-        <p style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>{gStats.length} групп</p>
-      </div>
-      <div style={{maxHeight:480,overflowY:'auto'}}>
-        <table style={{width:'100%',borderCollapse:'collapse'}}>
-          <thead><tr>
-            {['Группа','Участок','Выручка','Перем.','Маржа 1','Рент.',''].map((h,i)=>
-              <th key={i} style={thS}>{h}</th>)}
-          </tr></thead>
-          <tbody>{gStats.map(g=><tr key={g.id} style={{opacity:g.off?.3:1,transition:'opacity .3s'}}>
-            <td style={{...tdS,fontWeight:600,maxWidth:200}}>{g.name}</td>
-            <td style={{...tdS,color:'var(--text3)',fontSize:12,maxWidth:160}}>{g.areaName.length>20?g.areaName.slice(0,20)+'…':g.areaName}</td>
-            <td style={{...tdS,...S.mono,fontSize:13}}>{fmt(g.rev)}</td>
-            <td style={{...tdS,...S.mono,fontSize:13,color:'var(--red)'}}>{fmt(g.vc)}</td>
-            <td style={{...tdS,...S.mono,fontSize:13,color:g.cm>=0?'var(--green)':'var(--red)',fontWeight:600}}>{fmt(g.cm)}</td>
-            <td style={tdS}><Badge val={g.margin}/></td>
-            <td style={tdS}><Bar value={g.rev} max={maxGR} color="var(--blue)" w={100}/></td>
-          </tr>)}</tbody>
-        </table>
-      </div>
-    </div>}
+  /* ═══ TABS ═══ */
+  if(S.tab==='overview'){
+    const rows=[
+      {l:'Выручка',v:cur.rev,c:'var(--blue)'},
+      {l:'— Сырьё',v:-active.reduce((a,s)=>a+s.rawCost,0),c:'var(--red)'},
+      {l:'— Нормативы цеха',v:-active.reduce((a,s)=>a+s.normCost,0),c:'var(--amber)'},
+      {l:'— Транспорт',v:-active.reduce((a,s)=>a+s.transport,0),c:'#eab308'},
+      {l:'= Маржа 1',v:cur.cm1,c:'var(--green)',bold:true},
+      {l:'— Пост. затраты',v:-cur.fc,c:'var(--purple)'},
+      {l:'= Маржа 2',v:cur.cm2,c:cur.cm2>=0?'var(--teal)':'var(--red)',bold:true},
+    ];
+    html+=`<div class="card fu"><div class="card-head"><h3>Ступенчатый P&L</h3></div><div style="padding:0 20px 20px">
+      ${rows.map(r=>`<div class="wf-row${r.bold?' bold':''}">
+        <div class="wf-label">${r.l}</div>
+        <div class="wf-bar">${bar(r.v,cur.rev,r.c,240)}</div>
+        <div class="wf-val" style="color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</div>
+      </div>`).join('')}</div></div>`;
+  }
 
-    {tab==='clients'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,boxShadow:'var(--shadow)',overflow:'hidden'}}>
-      <div style={{padding:'16px 20px 0'}}>
-        <h3 style={{fontSize:15,fontWeight:700,marginBottom:4}}>Клиенты</h3>
-        <p style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>{cStats.length} клиентов</p>
-      </div>
-      <div style={{maxHeight:480,overflowY:'auto'}}>
-        <table style={{width:'100%',borderCollapse:'collapse'}}>
-          <thead><tr>
-            {['Клиент','Групп','Выручка','Маржа 1','Рент.','Доля',''].map((h,i)=>
-              <th key={i} style={thS}>{h}</th>)}
-          </tr></thead>
-          <tbody>{cStats.map(c=><tr key={c.id} style={{opacity:c.off?.3:1,transition:'opacity .3s'}}>
-            <td style={{...tdS,fontWeight:600,maxWidth:200}}>{c.name}</td>
-            <td style={{...tdS,color:'var(--text3)',textAlign:'center'}}>{c.groups}</td>
-            <td style={{...tdS,...S.mono,fontSize:13}}>{fmt(c.rev)}</td>
-            <td style={{...tdS,...S.mono,fontSize:13,color:c.cm>=0?'var(--green)':'var(--red)',fontWeight:600}}>{fmt(c.cm)}</td>
-            <td style={tdS}><Badge val={c.margin}/></td>
-            <td style={{...tdS,...S.mono,fontSize:12,color:'var(--text3)'}}>{cur.rev>0?pct(c.rev/cur.rev):'—'}</td>
-            <td style={tdS}><Bar value={c.rev} max={maxCR} color="var(--green)" w={100}/></td>
-          </tr>)}</tbody>
-        </table>
-      </div>
-    </div>}
+  if(S.tab==='groups'){
+    html+=`<div class="card fu"><div class="card-head"><h3>Товарные группы</h3><p>${gStats.length} групп</p></div>
+      <div class="card-scroll"><table><thead><tr>
+        ${['Группа','Участок','Выручка','Перем.','Маржа 1','Рент.',''].map(h=>`<th>${h}</th>`).join('')}
+      </tr></thead><tbody>
+        ${gStats.map(g=>`<tr${g.off?' class="dim"':''}>
+          <td style="font-weight:600;max-width:200px">${esc(g.name)}</td>
+          <td style="color:var(--tx3);font-size:12px;max-width:160px">${esc(g.areaName.length>22?g.areaName.slice(0,22)+'…':g.areaName)}</td>
+          <td style="font-family:var(--mono);font-size:13px">${fmt(g.rev)}</td>
+          <td style="font-family:var(--mono);font-size:13px;color:var(--red)">${fmt(g.vc)}</td>
+          <td style="font-family:var(--mono);font-size:13px;font-weight:600;color:${g.cm>=0?'var(--green)':'var(--red)'}">${fmt(g.cm)}</td>
+          <td>${badge(g.margin)}</td>
+          <td>${bar(g.rev,maxGR,'var(--blue)',100)}</td>
+        </tr>`).join('')}
+      </tbody></table></div></div>`;
+  }
 
-    {tab==='areas'&&<div className="fu" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:14}}>
-      {aStats.map(a=><div key={a.id} style={{
-        background:'var(--card)',border:`1.5px solid ${a.cm2<0&&a.on?'#fecaca':'var(--border)'}`,
-        borderRadius:12,padding:20,opacity:a.on?1:.3,transition:'opacity .3s',boxShadow:'var(--shadow)'}}>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
-          <div>
-            <h4 style={{fontSize:15,fontWeight:700,marginBottom:2}}>{a.name}</h4>
-            <span style={{fontSize:11,color:'var(--text3)',...S.mono}}>{a.cnt} отгрузок</span>
-          </div>
-          <span style={{fontSize:12,...S.mono,padding:'3px 10px',borderRadius:8,background:'#f3f4f6',color:'var(--text2)'}}>
-            Пост. {fmt(a.fixedCost)}
-          </span>
-        </div>
-        {[{l:'Выручка',v:a.rev},{l:'Маржа 1',v:a.cm1},{l:'Маржа 2',v:a.cm2}].map((r,i)=>
-          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:i<2?'1px solid var(--border2)':'none'}}>
-            <span style={{fontSize:13,color:'var(--text2)'}}>{r.l}</span>
-            <span style={{...S.mono,fontSize:14,fontWeight:600,color:r.v<0?'var(--red)':'var(--text)'}}>{fmtF(r.v)}</span>
-          </div>)}
-        {a.cm2<0&&a.on&&<div style={{marginTop:12,padding:'8px 12px',background:'var(--red-bg)',borderRadius:8,fontSize:12,color:'#b91c1c',lineHeight:1.4}}>
-          ⚠ Маржа 1 ({fmtF(a.cm1)}) не покрывает постоянные ({fmtF(a.fixedCost)})
-        </div>}
-      </div>)}
-    </div>}
+  if(S.tab==='clients'){
+    html+=`<div class="card fu"><div class="card-head"><h3>Клиенты</h3><p>${cStats.length} клиентов</p></div>
+      <div class="card-scroll"><table><thead><tr>
+        ${['Клиент','Групп','Выручка','Маржа 1','Рент.','Доля',''].map(h=>`<th>${h}</th>`).join('')}
+      </tr></thead><tbody>
+        ${cStats.map(c=>`<tr${c.off?' class="dim"':''}>
+          <td style="font-weight:600;max-width:200px">${esc(c.name)}</td>
+          <td style="color:var(--tx3);text-align:center">${c.groups}</td>
+          <td style="font-family:var(--mono);font-size:13px">${fmt(c.rev)}</td>
+          <td style="font-family:var(--mono);font-size:13px;font-weight:600;color:${c.cm>=0?'var(--green)':'var(--red)'}">${fmt(c.cm)}</td>
+          <td>${badge(c.margin)}</td>
+          <td style="font-family:var(--mono);font-size:12px;color:var(--tx3)">${cur.rev>0?pct(c.rev/cur.rev):'—'}</td>
+          <td>${bar(c.rev,maxCR,'var(--green)',100)}</td>
+        </tr>`).join('')}
+      </tbody></table></div></div>`;
+  }
 
-    {/* Footer */}
-    <div style={{marginTop:28,padding:'12px 0',borderTop:'1px solid var(--border)',fontSize:11,color:'var(--text3)',...S.mono,
-      display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
-      <span>{sqlOk?'✓ Данные загружены':'◦ Демо'} · {areaOk?'✓ Участки':'◦ Участки: демо'}</span>
-      <span>{ships.length} строк · {allClients.length} клиентов · {allGroups.length} групп</span>
-    </div>
-  </div>
+  if(S.tab==='areas'){
+    html+=`<div class="area-grid fu">${aStats.map(a=>`
+      <div class="area-card${a.on?'':' off'}${a.cm2<0&&a.on?' warn-b':''}">
+        <div class="area-top"><div>
+          <h4>${esc(a.name)}</h4>
+          <span style="font-size:11px;color:var(--tx3);font-family:var(--mono)">${a.cnt} отгрузок</span>
+        </div><span style="font-size:12px;font-family:var(--mono);padding:3px 10px;border-radius:8px;background:#f3f4f6;color:var(--tx2)">Пост. ${fmt(a.fixedCost)}</span></div>
+        ${[{l:'Выручка',v:a.rev},{l:'Маржа 1',v:a.cm1},{l:'Маржа 2',v:a.cm2}].map(r=>`
+          <div class="area-row"><span style="font-size:13px;color:var(--tx2)">${r.l}</span>
+          <span style="font-family:var(--mono);font-size:14px;font-weight:600;color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</span></div>`).join('')}
+        ${a.cm2<0&&a.on?`<div class="area-warn">⚠ Маржа 1 (${fmtF(a.cm1)}) не покрывает постоянные (${fmtF(a.fixedCost)})</div>`:''}
+      </div>`).join('')}</div>`;
+  }
+
+  /* Footer */
+  html+=`<div class="footer">
+    <span>${S.sqlOk?'✓ Данные загружены':'◦ Демо'} · ${S.areaOk?'✓ Участки':'◦ Участки: демо'}</span>
+    <span>${ships.length} строк · ${clients.length} клиентов · ${groups.length} групп</span>
+  </div>`;
+
+  document.getElementById('app').innerHTML=html;
+  bind();
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+/* ══════ EVENTS ══════ */
+function bind(){
+  document.getElementById('fSQL')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)loadSQL(f)});
+  document.getElementById('fArea')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)loadAreas(f)});
+  document.getElementById('dFrom')?.addEventListener('change',e=>{S.dateFrom=e.target.value;render()});
+  document.getElementById('dTo')?.addEventListener('change',e=>{S.dateTo=e.target.value;render()});
+
+  document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{S.tab=b.dataset.tab;render()}));
+  document.getElementById('toggleSc')?.addEventListener('click',()=>{S.scOpen=!S.scOpen;render()});
+
+  document.querySelectorAll('[data-tA]').forEach(b=>b.addEventListener('click',()=>{tog(S.offA,b.dataset.ta);render()}));
+  document.querySelectorAll('[data-tG]').forEach(b=>b.addEventListener('click',()=>{tog(S.offG,b.dataset.tg);render()}));
+  document.querySelectorAll('[data-tC]').forEach(b=>b.addEventListener('click',()=>{tog(S.offC,b.dataset.tc);render()}));
+
+  document.getElementById('sG')?.addEventListener('input',e=>{S.searchG=e.target.value;render();
+    const el=document.getElementById('sG');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
+  document.getElementById('sC')?.addEventListener('input',e=>{S.searchC=e.target.value;render();
+    const el=document.getElementById('sC');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
+
+  document.getElementById('enG')?.addEventListener('click',()=>{S.offG=new Set();render()});
+  document.getElementById('enC')?.addEventListener('click',()=>{S.offC=new Set();render()});
+  document.getElementById('resetAll')?.addEventListener('click',()=>{S.offA=new Set();S.offG=new Set();S.offC=new Set();render()});
+}
+
+render();
 </script>
 </body>
 </html>
