@@ -15,12 +15,17 @@
 body{background:#fafaf5;color:#1a1a18;font-family:'Source Serif 4',Georgia,serif;padding:28px 32px;min-height:100vh}
 @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fadeIn .35s ease-out both}
+.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;
+  font-family:'DM Mono',monospace;z-index:999;animation:fadeIn .3s ease-out;max-width:500px;line-height:1.5}
+.toast.ok{background:#ecfdf5;border:1px solid #86efac;color:#059669}
+.toast.err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
+.toast.info{background:#eff6ff;border:1px solid #93c5fd;color:#2563eb}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useMemo,useCallback,useRef} = React;
+const {useState,useMemo,useCallback,useRef,useEffect} = React;
 
 /* ═══ DEMO DATA ═══ */
 const DEMO_AREAS=[
@@ -58,7 +63,23 @@ const pct=n=>(n*100).toFixed(1)+"%";
 const mono={fontFamily:"'DM Mono',monospace"};
 const serif={fontFamily:"'Instrument Serif',serif"};
 
-/* ═══ COMPONENTS ═══ */
+/* Parse number: handles "1 234,56" and "1234.56" */
+function parseNum(v){
+  if(v===null||v===undefined||v==='')return 0;
+  let s=String(v).trim().replace(/\s/g,'').replace(/,/g,'.');
+  const n=parseFloat(s);
+  return isNaN(n)?0:n;
+}
+
+/* Detect delimiter: tab, semicolon, or comma */
+function detectDelimiter(text){
+  const firstLine=text.split(/\r?\n/)[0]||'';
+  if(firstLine.includes('\t'))return '\t';
+  if(firstLine.includes(';'))return ';';
+  return ',';
+}
+
+/* ═══ SMALL COMPONENTS ═══ */
 const Toggle=({active,onClick,children,accent})=>(
   <button onClick={onClick} style={{
     padding:"5px 14px",borderRadius:20,cursor:"pointer",fontSize:12.5,...mono,
@@ -100,6 +121,12 @@ const HBar=({value,max,color,w=160})=>{
   );
 };
 
+const Badge=({val})=>{
+  const bg=val>0.3?"#ecfdf5":val>0.15?"#fffbeb":"#fef2f2";
+  const c=val>0.3?"#059669":val>0.15?"#d97706":"#dc2626";
+  return <span style={{padding:"3px 10px",borderRadius:10,fontSize:12,...mono,background:bg,color:c}}>{pct(val)}</span>;
+};
+
 const FileBtn=({label,accept,onLoad,loaded})=>{
   const ref=useRef();
   return(
@@ -116,13 +143,15 @@ const FileBtn=({label,accept,onLoad,loaded})=>{
   );
 };
 
-const Badge=({val})=>{
-  const bg=val>0.3?"#ecfdf5":val>0.15?"#fffbeb":"#fef2f2";
-  const c=val>0.3?"#059669":val>0.15?"#d97706":"#dc2626";
-  return <span style={{padding:"3px 10px",borderRadius:10,fontSize:12,...mono,background:bg,color:c}}>{pct(val)}</span>;
+/* Toast notification */
+const Toast=({msg,type,onClose})=>{
+  useEffect(()=>{const t=setTimeout(onClose,6000);return()=>clearTimeout(t)},[onClose]);
+  return <div className={`toast ${type}`}>{msg}</div>;
 };
 
-/* ═══ MAIN DASHBOARD ═══ */
+/* ═══════════════════════════════════════
+   MAIN DASHBOARD
+   ═══════════════════════════════════════ */
 function Dashboard(){
   const [areas,setAreas]=useState(DEMO_AREAS);
   const [gpArea,setGpArea]=useState(DEMO_GP_AREA);
@@ -133,58 +162,132 @@ function Dashboard(){
   const [offG,setOffG]=useState(new Set());
   const [offC,setOffC]=useState(new Set());
   const [tab,setTab]=useState("overview");
+  const [toast,setToast]=useState(null);
 
+  const notify=(msg,type='info')=>setToast({msg,type,key:Date.now()});
   const tog=useCallback((s,setter,id)=>{
     setter(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
   },[]);
 
-  /* ── CSV loader ── */
+  /* ── Smart CSV/XLSX loader ── */
   const loadSQL=useCallback(file=>{
-    const r=new FileReader();
-    r.onload=e=>{
-      const txt=e.target.result;
-      const d=txt.indexOf('\t')!==-1?'\t':',';
-      const parsed=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:d});
-      const rows=parsed.data.map(r=>{
-        const g=ks=>{for(const k of ks)if(r[k]!==undefined&&r[k]!=='')return r[k];return null};
-        return{
-          orderId:g(["Код заявки","ORDER_ID"])||"",
-          client:g(["Клиент","Client_Name"])||"",
-          gpGroup:g(["Товарная группа","GP_Group"])||"",
-          gpName:g(["Готовая продукция (ГП)","GP_Name"])||"",
-          gpId:String(g(["Код_ГП","GP_ID","TOV_ID"])||""),
-          qty:parseFloat(g(["Отгружено ГП (кг)","GP_Qty"])||0),
-          revenue:parseFloat(g(["Выручка по ГП (RUR)","Revenue_RUR"])||0),
-          rawCost:parseFloat(g(["Прямые_Затраты_Сырье_Склад"])||0),
-          normCost:parseFloat(g(["Прямые_Затраты_Нормы_Цех"])||0),
-          transport:parseFloat(g(["Прямые_Затраты_Транспорт"])||0),
-        };
-      }).filter(r=>r.revenue>0);
-      if(rows.length){setShips(rows);setSqlOk(true);setOffA(new Set());setOffG(new Set());setOffC(new Set())}
+    const ext=file.name.split('.').pop().toLowerCase();
+
+    /* If it's an Excel file, use XLSX */
+    if(ext==='xlsx'||ext==='xls'){
+      const reader=new FileReader();
+      reader.onload=e=>{
+        try{
+          const wb=XLSX.read(e.target.result,{type:"array"});
+          const sheet=wb.Sheets[wb.SheetNames[0]];
+          const data=XLSX.utils.sheet_to_json(sheet);
+          const rows=mapRows(data);
+          if(rows.length){
+            setShips(rows);setSqlOk(true);
+            setOffA(new Set());setOffG(new Set());setOffC(new Set());
+            notify(`✓ Загружено ${rows.length} строк из Excel`,'ok');
+          }else{
+            notify('Файл прочитан но строк с выручкой > 0 не найдено. Проверьте названия колонок.','err');
+          }
+        }catch(err){notify('Ошибка чтения Excel: '+err.message,'err')}
+      };
+      reader.readAsArrayBuffer(file);
+      return;
+    }
+
+    /* CSV/TSV/TXT: try multiple encodings */
+    const tryRead=(encoding)=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        let txt=e.target.result;
+        /* Remove BOM */
+        if(txt.charCodeAt(0)===0xFEFF) txt=txt.slice(1);
+
+        const delim=detectDelimiter(txt);
+        const parsed=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:delim});
+
+        if(!parsed.data||parsed.data.length===0){
+          if(encoding==='UTF-8'){
+            tryRead('windows-1251');
+          }else{
+            notify('Не удалось распарсить файл. Попробуйте пересохранить как CSV UTF-8.','err');
+          }
+          return;
+        }
+
+        /* Debug: show found columns */
+        const cols=parsed.meta?.fields||Object.keys(parsed.data[0]||{});
+        console.log('Найдены колонки:', cols);
+        console.log('Разделитель:', delim==='\\t'?'TAB':delim);
+        console.log('Первая строка:', parsed.data[0]);
+
+        const rows=mapRows(parsed.data);
+
+        if(rows.length){
+          setShips(rows);setSqlOk(true);
+          setOffA(new Set());setOffG(new Set());setOffC(new Set());
+          notify(`✓ Загружено ${rows.length} строк (разделитель: ${delim==='\t'?'TAB':delim===';'?';':','})`, 'ok');
+        }else{
+          /* Check if columns just didn't match */
+          const colList=cols.slice(0,5).join(', ');
+          if(encoding==='UTF-8'){
+            tryRead('windows-1251');
+          }else{
+            notify(`Файл прочитан (${parsed.data.length} строк), но не удалось найти нужные колонки. Найдены: ${colList}...`, 'err');
+          }
+        }
+      };
+      reader.readAsText(file, encoding);
     };
-    r.readAsText(file);
+    tryRead('UTF-8');
   },[]);
 
-  /* ── XLSX loader ── */
+  /* Map raw row object to our format - tries many column name variants */
+  function mapRows(data){
+    return data.map(r=>{
+      const g=(...ks)=>{for(const k of ks){const v=r[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()} return null};
+      return{
+        orderId: g("Код заявки","Код_заявки","ORDER_ID","orderId")||"",
+        client:  g("Клиент","Client_Name","client","Клиент ")||"",
+        gpGroup: g("Товарная группа","Товарная_группа","GP_Group","gpGroup")||"",
+        gpName:  g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name","gpName")||"",
+        gpId:    g("Код_ГП","Код ГП","GP_ID","gpId","TOV_ID")||"",
+        qty:     parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","Отгружено ГП","GP_Qty","qty")),
+        revenue: parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Выручка по ГП","Revenue_RUR","revenue")),
+        rawCost: parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад","rawCost")),
+        normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех","normCost")),
+        transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт","transport")),
+      };
+    }).filter(r=>r.revenue>0);
+  }
+
+  /* ── XLSX areas loader ── */
   const loadAreas=useCallback(file=>{
-    const r=new FileReader();
-    r.onload=e=>{
-      const wb=XLSX.read(e.target.result,{type:"array"});
-      const aRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
-        id:String(r["Код_участка"]||r["id"]||""),
-        name:r["Название_участка"]||r["name"]||"",
-        fixedCost:parseFloat(r["Пост_затраты_месяц"]||r["fixedCost"]||0),
-      })).filter(a=>a.id);
-      let mp=[];
-      if(wb.SheetNames.length>1){
-        mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
-          tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["tovId"]||""),
-          areaId:String(r["Код_участка"]||r["areaId"]||""),
-        })).filter(m=>m.tovId&&m.areaId);
-      }
-      if(aRows.length){setAreas(aRows);if(mp.length)setGpArea(mp);setAreaOk(true);setOffA(new Set())}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const wb=XLSX.read(e.target.result,{type:"array"});
+        const aRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
+          id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
+          name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
+          fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
+        })).filter(a=>a.id);
+        let mp=[];
+        if(wb.SheetNames.length>1){
+          mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
+            tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||r["tovId"]||""),
+            areaId:String(r["Код_участка"]||r["Код участка"]||r["areaId"]||""),
+          })).filter(m=>m.tovId&&m.areaId);
+        }
+        if(aRows.length){
+          setAreas(aRows);if(mp.length)setGpArea(mp);setAreaOk(true);setOffA(new Set());
+          notify(`✓ Загружено ${aRows.length} участков, ${mp.length} привязок ГП`,'ok');
+        }else{
+          notify('Не найдены участки. Проверьте колонки: Код_участка, Название_участка, Пост_затраты_месяц','err');
+        }
+      }catch(err){notify('Ошибка чтения: '+err.message,'err')}
     };
-    r.readAsArrayBuffer(file);
+    reader.readAsArrayBuffer(file);
   },[]);
 
   /* ── Derived data ── */
@@ -270,6 +373,9 @@ function Dashboard(){
 
   return(
     <div>
+      {/* Toast */}
+      {toast&&<Toast key={toast.key} msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+
       {/* Header */}
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:16}}>
         <div>
@@ -279,7 +385,7 @@ function Dashboard(){
           </p>
         </div>
         <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          <FileBtn label="SQL результат (.csv)" accept=".csv,.tsv,.txt" onLoad={loadSQL} loaded={sqlOk}/>
+          <FileBtn label="SQL данные (.csv / .xlsx)" accept=".csv,.tsv,.txt,.xlsx,.xls" onLoad={loadSQL} loaded={sqlOk}/>
           <FileBtn label="Участки (.xlsx)" accept=".xlsx,.xls" onLoad={loadAreas} loaded={areaOk}/>
         </div>
       </div>
