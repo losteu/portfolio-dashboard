@@ -3,326 +3,231 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Портфельный анализ — What-if сценарии</title>
+<title>Портфельный анализ</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400;600;700&family=DM+Mono:wght@400;500&family=Instrument+Serif&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
+:root{
+  --bg:#f4f5f7;--card:#fff;--border:#e2e4ea;--border2:#edeef2;
+  --text:#111827;--text2:#4b5563;--text3:#9ca3af;
+  --blue:#3b82f6;--green:#10b981;--red:#ef4444;--amber:#f59e0b;--purple:#8b5cf6;--teal:#14b8a6;
+  --blue-bg:#eff6ff;--green-bg:#ecfdf5;--red-bg:#fef2f2;--amber-bg:#fffbeb;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+  --shadow:0 1px 2px rgba(0,0,0,.05);
+  --shadow2:0 4px 12px rgba(0,0,0,.06);
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#fafaf5;color:#1a1a18;font-family:'Source Serif 4',Georgia,serif;padding:28px 32px;min-height:100vh}
-@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fi{animation:fadeIn .35s ease-out both}
-.toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;
-  font-family:'DM Mono',monospace;z-index:999;animation:fadeIn .3s ease-out;max-width:500px;line-height:1.5}
-.toast.ok{background:#ecfdf5;border:1px solid #86efac;color:#059669}
-.toast.err{background:#fef2f2;border:1px solid #fca5a5;color:#dc2626}
-.toast.info{background:#eff6ff;border:1px solid #93c5fd;color:#2563eb}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.fu{animation:fadeUp .3s ease-out both}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:9px}
 </style>
 </head>
 <body>
 <div id="root"></div>
 <script type="text/babel">
-const {useState,useMemo,useCallback,useRef,useEffect} = React;
+const {useState,useMemo,useCallback,useRef,useEffect}=React;
 
-/* ═══ DEMO DATA ═══ */
+/* ═══ DEMO ═══ */
 const DEMO_AREAS=[
   {id:"A1",name:"Участок №1 — Сухие смеси",fixedCost:820000},
   {id:"A2",name:"Участок №2 — Жидкие формы",fixedCost:1150000},
   {id:"A3",name:"Участок №3 — Фасовка",fixedCost:540000},
 ];
-const DEMO_GP_AREA=[
+const DEMO_GP=[
   {tovId:"GP01",areaId:"A1"},{tovId:"GP02",areaId:"A1"},
   {tovId:"GP03",areaId:"A2"},{tovId:"GP04",areaId:"A2"},
   {tovId:"GP05",areaId:"A3"},
 ];
-const DEMO_SHIPS=[
-  {orderId:"Z001",client:"ООО «Агротех»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4200,revenue:2800000,rawCost:1120000,normCost:280000,transport:85000},
-  {orderId:"Z002",client:"АО «ФудМастер»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4600,revenue:3100000,rawCost:1240000,normCost:310000,transport:62000},
-  {orderId:"Z003",client:"ТОО «КазПром»",gpGroup:"Премиум линейка",gpName:"Смесь Бета 10кг",gpId:"GP01",qty:2200,revenue:1500000,rawCost:600000,normCost:150000,transport:120000},
-  {orderId:"Z004",client:"ООО «Агротех»",gpGroup:"Стандарт линейка",gpName:"Базовая смесь 50кг",gpId:"GP02",qty:5800,revenue:1900000,rawCost:950000,normCost:190000,transport:55000},
-  {orderId:"Z005",client:"ИП Сидоров",gpGroup:"Стандарт линейка",gpName:"Базовая смесь 50кг",gpId:"GP02",qty:3100,revenue:980000,rawCost:530000,normCost:98000,transport:95000},
-  {orderId:"Z006",client:"ООО «Дельта»",gpGroup:"Стандарт линейка",gpName:"Эконом смесь 25кг",gpId:"GP02",qty:2400,revenue:750000,rawCost:420000,normCost:75000,transport:110000},
-  {orderId:"Z007",client:"АО «ФудМастер»",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-10",gpId:"GP03",qty:6300,revenue:4200000,rawCost:1680000,normCost:504000,transport:42000},
-  {orderId:"Z008",client:"ТОО «КазПром»",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-10",gpId:"GP03",qty:3200,revenue:2100000,rawCost:900000,normCost:252000,transport:88000},
-  {orderId:"Z009",client:"ИП Ким",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-5",gpId:"GP03",qty:1300,revenue:890000,rawCost:445000,normCost:107000,transport:78000},
-  {orderId:"Z010",client:"ООО «Агротех»",gpGroup:"Эмульсии",gpName:"Эмульсия Е-200",gpId:"GP04",qty:2400,revenue:1600000,rawCost:880000,normCost:192000,transport:64000},
-  {orderId:"Z011",client:"ООО «Дельта»",gpGroup:"Эмульсии",gpName:"Эмульсия Е-200",gpId:"GP04",qty:950,revenue:620000,rawCost:390000,normCost:74000,transport:52000},
-  {orderId:"Z012",client:"ИП Сидоров",gpGroup:"Эмульсии",gpName:"Эмульсия Е-100",gpId:"GP04",qty:520,revenue:340000,rawCost:245000,normCost:41000,transport:68000},
-  {orderId:"Z013",client:"ООО «Агротех»",gpGroup:"Фасованная продукция",gpName:"Фасовка 1кг",gpId:"GP05",qty:8800,revenue:2200000,rawCost:880000,normCost:176000,transport:44000},
-  {orderId:"Z014",client:"АО «ФудМастер»",gpGroup:"Фасованная продукция",gpName:"Фасовка 5кг",gpId:"GP05",qty:7200,revenue:1800000,rawCost:720000,normCost:144000,transport:36000},
-  {orderId:"Z015",client:"ИП Ким",gpGroup:"Фасованная продукция",gpName:"Фасовка 1кг",gpId:"GP05",qty:3800,revenue:950000,rawCost:475000,normCost:76000,transport:72000},
+const DS=[
+  {orderId:"Z001",date:"2025-12-05",client:"ООО «Агротех»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4200,revenue:2800000,rawCost:1120000,normCost:280000,transport:85000},
+  {orderId:"Z002",date:"2025-12-08",client:"АО «ФудМастер»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4600,revenue:3100000,rawCost:1240000,normCost:310000,transport:62000},
+  {orderId:"Z003",date:"2025-12-10",client:"ТОО «КазПром»",gpGroup:"Премиум линейка",gpName:"Смесь Бета 10кг",gpId:"GP01",qty:2200,revenue:1500000,rawCost:600000,normCost:150000,transport:120000},
+  {orderId:"Z004",date:"2025-12-12",client:"ООО «Агротех»",gpGroup:"Стандарт линейка",gpName:"Базовая смесь 50кг",gpId:"GP02",qty:5800,revenue:1900000,rawCost:950000,normCost:190000,transport:55000},
+  {orderId:"Z005",date:"2025-12-14",client:"ИП Сидоров",gpGroup:"Стандарт линейка",gpName:"Базовая смесь 50кг",gpId:"GP02",qty:3100,revenue:980000,rawCost:530000,normCost:98000,transport:95000},
+  {orderId:"Z006",date:"2025-12-15",client:"ООО «Дельта»",gpGroup:"Стандарт линейка",gpName:"Эконом смесь 25кг",gpId:"GP02",qty:2400,revenue:750000,rawCost:420000,normCost:75000,transport:110000},
+  {orderId:"Z007",date:"2025-12-18",client:"АО «ФудМастер»",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-10",gpId:"GP03",qty:6300,revenue:4200000,rawCost:1680000,normCost:504000,transport:42000},
+  {orderId:"Z008",date:"2025-12-20",client:"ТОО «КазПром»",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-10",gpId:"GP03",qty:3200,revenue:2100000,rawCost:900000,normCost:252000,transport:88000},
+  {orderId:"Z009",date:"2025-12-22",client:"ИП Ким",gpGroup:"Жидкие концентраты",gpName:"Концентрат К-5",gpId:"GP03",qty:1300,revenue:890000,rawCost:445000,normCost:107000,transport:78000},
+  {orderId:"Z010",date:"2026-01-05",client:"ООО «Агротех»",gpGroup:"Эмульсии",gpName:"Эмульсия Е-200",gpId:"GP04",qty:2400,revenue:1600000,rawCost:880000,normCost:192000,transport:64000},
+  {orderId:"Z011",date:"2026-01-08",client:"ООО «Дельта»",gpGroup:"Эмульсии",gpName:"Эмульсия Е-200",gpId:"GP04",qty:950,revenue:620000,rawCost:390000,normCost:74000,transport:52000},
+  {orderId:"Z012",date:"2026-01-10",client:"ИП Сидоров",gpGroup:"Эмульсии",gpName:"Эмульсия Е-100",gpId:"GP04",qty:520,revenue:340000,rawCost:245000,normCost:41000,transport:68000},
+  {orderId:"Z013",date:"2026-01-15",client:"ООО «Агротех»",gpGroup:"Фасованная продукция",gpName:"Фасовка 1кг",gpId:"GP05",qty:8800,revenue:2200000,rawCost:880000,normCost:176000,transport:44000},
+  {orderId:"Z014",date:"2026-01-18",client:"АО «ФудМастер»",gpGroup:"Фасованная продукция",gpName:"Фасовка 5кг",gpId:"GP05",qty:7200,revenue:1800000,rawCost:720000,normCost:144000,transport:36000},
+  {orderId:"Z015",date:"2026-01-20",client:"ИП Ким",gpGroup:"Фасованная продукция",gpName:"Фасовка 1кг",gpId:"GP05",qty:3800,revenue:950000,rawCost:475000,normCost:76000,transport:72000},
 ];
 
 /* ═══ HELPERS ═══ */
 const fmt=n=>{if(Math.abs(n)>=1e6)return(n/1e6).toFixed(2)+"М";if(Math.abs(n)>=1e3)return(n/1e3).toFixed(1)+"К";return n.toFixed(0)};
 const fmtF=n=>n.toLocaleString("ru-RU",{maximumFractionDigits:0})+" ₽";
 const pct=n=>(n*100).toFixed(1)+"%";
-const mono={fontFamily:"'DM Mono',monospace"};
-const serif={fontFamily:"'Instrument Serif',serif"};
+const parseNum=v=>{if(v==null||v==='')return 0;let s=String(v).trim().replace(/\s/g,'').replace(/,/g,'.');const n=parseFloat(s);return isNaN(n)?0:n};
+const detectDelim=t=>{const l=t.split(/\r?\n/)[0]||'';if(l.includes('\t'))return'\t';if(l.includes(';'))return';';return','};
+const months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+const fmtDate=s=>{if(!s)return'';const d=new Date(s);if(isNaN(d))return s;return d.getDate()+' '+months[d.getMonth()]+' '+d.getFullYear()};
 
-/* Parse number: handles "1 234,56" and "1234.56" */
-function parseNum(v){
-  if(v===null||v===undefined||v==='')return 0;
-  let s=String(v).trim().replace(/\s/g,'').replace(/,/g,'.');
-  const n=parseFloat(s);
-  return isNaN(n)?0:n;
+/* ═══ COMPONENTS ═══ */
+const S={mono:{fontFamily:'var(--mono)'},td:{padding:'10px 14px',verticalAlign:'middle'}};
+
+function Chip({active,onClick,children,accent='var(--blue)'}){
+  return <button onClick={onClick} style={{
+    padding:'4px 12px',borderRadius:16,cursor:'pointer',fontSize:12,fontFamily:'var(--sans)',fontWeight:500,
+    transition:'all .2s',display:'inline-flex',alignItems:'center',gap:5,whiteSpace:'nowrap',lineHeight:'20px',
+    background:active?accent:'#f3f4f6',color:active?'#fff':'#9ca3af',
+    border:active?'1.5px solid transparent':'1.5px solid #e5e7eb',
+    textDecoration:active?'none':'line-through',opacity:active?1:.65,
+  }}>{children}</button>
 }
 
-/* Detect delimiter: tab, semicolon, or comma */
-function detectDelimiter(text){
-  const firstLine=text.split(/\r?\n/)[0]||'';
-  if(firstLine.includes('\t'))return '\t';
-  if(firstLine.includes(';'))return ';';
-  return ',';
-}
-
-/* ═══ SMALL COMPONENTS ═══ */
-const Toggle=({active,onClick,children,accent})=>(
-  <button onClick={onClick} style={{
-    padding:"5px 14px",borderRadius:20,cursor:"pointer",fontSize:12.5,...mono,
-    transition:"all 0.25s",display:"inline-flex",alignItems:"center",gap:6,whiteSpace:"nowrap",
-    background:active?accent:"#f5f5f0",color:active?"#fff":"#999",
-    border:active?`1.5px solid ${accent}`:"1.5px dashed #d0cec6",
-    boxShadow:active?`0 2px 8px ${accent}33`:"none",
-    textDecoration:active?"none":"line-through",
-  }}>
-    <span style={{width:7,height:7,borderRadius:"50%",background:active?"#fff":"#ccc",display:"inline-block"}}/>
-    {children}
-  </button>
-);
-
-const Metric=({label,value,sub,delta,warn})=>(
-  <div style={{
-    background:warn?"#fef2f2":"#fff",border:warn?"1px solid #fca5a5":"1px solid #e8e6df",
-    borderRadius:14,padding:"18px 22px",flex:"1 1 200px",minWidth:175,boxShadow:"0 1px 3px rgba(0,0,0,0.04)",
-  }}>
-    <div style={{fontSize:10.5,color:"#8a8780",textTransform:"uppercase",letterSpacing:2,marginBottom:8,...mono}}>{label}</div>
-    <div style={{fontSize:26,fontWeight:700,color:warn?"#dc2626":"#1a1a18",...serif}}>{value}</div>
-    {sub&&<div style={{fontSize:12,color:"#a0a090",marginTop:3,...mono}}>{sub}</div>}
-    {delta!==undefined&&(
-      <div style={{fontSize:12,marginTop:8,...mono,color:delta>=0?"#059669":"#dc2626",
-        background:delta>=0?"#ecfdf5":"#fef2f2",display:"inline-block",padding:"2px 10px",borderRadius:10}}>
-        {delta>=0?"↑":"↓"} {fmtF(Math.abs(delta))}
-      </div>
-    )}
+function KPI({label,value,sub,delta,warn}){
+  return <div style={{background:warn?'var(--red-bg)':'var(--card)',border:warn?'1px solid #fecaca':'1px solid var(--border)',
+    borderRadius:12,padding:'16px 20px',flex:'1 1 180px',minWidth:160,boxShadow:'var(--shadow)'}}>
+    <div style={{fontSize:11,color:'var(--text3)',fontWeight:600,textTransform:'uppercase',letterSpacing:1,marginBottom:6,...S.mono}}>{label}</div>
+    <div style={{fontSize:24,fontWeight:700,color:warn?'var(--red)':'var(--text)',letterSpacing:-.5}}>{value}</div>
+    {sub&&<div style={{fontSize:12,color:'var(--text3)',marginTop:2,...S.mono}}>{sub}</div>}
+    {delta!==undefined&&<div style={{fontSize:11,marginTop:6,...S.mono,display:'inline-flex',alignItems:'center',gap:3,
+      padding:'2px 8px',borderRadius:8,fontWeight:500,
+      color:delta>=0?'var(--green)':'var(--red)',background:delta>=0?'var(--green-bg)':'var(--red-bg)',
+    }}>{delta>=0?'↑':'↓'} {fmtF(Math.abs(delta))}</div>}
   </div>
-);
+}
 
-const HBar=({value,max,color,w=160})=>{
-  const ratio=max>0?Math.min(Math.abs(value)/max,1):0;
-  return(
-    <div style={{width:w,height:14,background:"#f0efe8",borderRadius:7,overflow:"hidden",flexShrink:0}}>
-      <div style={{width:`${ratio*100}%`,height:"100%",borderRadius:7,
-        background:value<0?"#fca5a5":color,transition:"width 0.4s"}}/>
-    </div>
-  );
-};
+function Bar({value,max,color,w=140}){
+  const r=max>0?Math.min(Math.abs(value)/max,1):0;
+  return <div style={{width:w,height:10,background:'#f3f4f6',borderRadius:5,overflow:'hidden',flexShrink:0}}>
+    <div style={{width:`${r*100}%`,height:'100%',borderRadius:5,background:value<0?'#fca5a5':color,transition:'width .4s'}}/>
+  </div>
+}
 
-const Badge=({val})=>{
-  const bg=val>0.3?"#ecfdf5":val>0.15?"#fffbeb":"#fef2f2";
-  const c=val>0.3?"#059669":val>0.15?"#d97706":"#dc2626";
-  return <span style={{padding:"3px 10px",borderRadius:10,fontSize:12,...mono,background:bg,color:c}}>{pct(val)}</span>;
-};
+function Badge({val}){
+  const c=val>.3?{bg:'var(--green-bg)',c:'var(--green)'}:val>.15?{bg:'var(--amber-bg)',c:'var(--amber)'}:{bg:'var(--red-bg)',c:'var(--red)'};
+  return <span style={{padding:'2px 8px',borderRadius:8,fontSize:11,...S.mono,fontWeight:500,background:c.bg,color:c.c}}>{pct(val)}</span>
+}
 
-const FileBtn=({label,accept,onLoad,loaded})=>{
+function FileBtn({label,accept,onLoad,loaded}){
   const ref=useRef();
-  return(
-    <button onClick={()=>ref.current?.click()} style={{
-      padding:"8px 18px",borderRadius:10,cursor:"pointer",fontSize:12,...mono,
-      background:loaded?"#ecfdf5":"#fff",border:loaded?"1.5px solid #059669":"1.5px solid #d0cec6",
-      color:loaded?"#059669":"#555",transition:"all 0.2s",
-    }}>
-      {loaded?"✓ ":"↑ "}{label}
-      <input ref={ref} type="file" accept={accept} style={{display:"none"}} onChange={e=>{
-        const f=e.target.files?.[0]; if(f) onLoad(f);
-      }}/>
-    </button>
-  );
-};
+  return <button onClick={()=>ref.current?.click()} style={{
+    padding:'6px 14px',borderRadius:8,cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)',
+    background:loaded?'var(--green-bg)':'var(--card)',border:loaded?'1px solid var(--green)':'1px solid var(--border)',
+    color:loaded?'var(--green)':'var(--text2)',transition:'all .2s',display:'inline-flex',alignItems:'center',gap:4,
+  }}>{loaded?'✓':'↑'} {label}<input ref={ref} type="file" accept={accept} style={{display:'none'}} onChange={e=>{const f=e.target.files?.[0];if(f)onLoad(f)}}/></button>
+}
 
-/* Toast notification */
-const Toast=({msg,type,onClose})=>{
-  useEffect(()=>{const t=setTimeout(onClose,6000);return()=>clearTimeout(t)},[onClose]);
-  return <div className={`toast ${type}`}>{msg}</div>;
-};
+function Toast({msg,type,onClose}){
+  useEffect(()=>{const t=setTimeout(onClose,5000);return()=>clearTimeout(t)},[onClose]);
+  const bg={ok:'var(--green-bg)',err:'var(--red-bg)',info:'var(--blue-bg)'}[type]||'var(--blue-bg)';
+  const bc={ok:'#86efac',err:'#fca5a5',info:'#93c5fd'}[type]||'#93c5fd';
+  const c={ok:'var(--green)',err:'var(--red)',info:'var(--blue)'}[type]||'var(--blue)';
+  return <div className="fu" style={{position:'fixed',top:16,right:16,padding:'10px 18px',borderRadius:10,fontSize:13,
+    fontFamily:'var(--sans)',zIndex:999,maxWidth:460,lineHeight:1.5,background:bg,border:`1px solid ${bc}`,color:c,boxShadow:'var(--shadow2)'}}>{msg}</div>
+}
 
-/* ═══════════════════════════════════════
-   MAIN DASHBOARD
-   ═══════════════════════════════════════ */
-function Dashboard(){
+/* ═══ DASHBOARD ═══ */
+function App(){
   const [areas,setAreas]=useState(DEMO_AREAS);
-  const [gpArea,setGpArea]=useState(DEMO_GP_AREA);
-  const [ships,setShips]=useState(DEMO_SHIPS);
+  const [gpArea,setGpArea]=useState(DEMO_GP);
+  const [ships,setShips]=useState(DS);
   const [sqlOk,setSqlOk]=useState(false);
   const [areaOk,setAreaOk]=useState(false);
   const [offA,setOffA]=useState(new Set());
   const [offG,setOffG]=useState(new Set());
   const [offC,setOffC]=useState(new Set());
-  const [tab,setTab]=useState("overview");
+  const [tab,setTab]=useState('overview');
   const [toast,setToast]=useState(null);
+  const [scenarioOpen,setScenarioOpen]=useState(true);
+  const [searchC,setSearchC]=useState('');
+  const [searchG,setSearchG]=useState('');
 
-  const notify=(msg,type='info')=>setToast({msg,type,key:Date.now()});
-  const tog=useCallback((s,setter,id)=>{
-    setter(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n});
-  },[]);
+  const notify=(m,t='info')=>setToast({msg:m,type:t,key:Date.now()});
+  const tog=useCallback((s,fn,id)=>fn(p=>{const n=new Set(p);n.has(id)?n.delete(id):n.add(id);return n}),[]);
 
-  /* ── Smart CSV/XLSX loader ── */
-  const loadSQL=useCallback(file=>{
-    const ext=file.name.split('.').pop().toLowerCase();
+  /* Period from data */
+  const period=useMemo(()=>{
+    const dates=ships.map(s=>s.date).filter(Boolean).sort();
+    if(!dates.length)return{from:'',to:'',label:'Нет данных'};
+    return{from:dates[0],to:dates[dates.length-1],label:fmtDate(dates[0])+' — '+fmtDate(dates[dates.length-1])};
+  },[ships]);
 
-    /* If it's an Excel file, use XLSX */
-    if(ext==='xlsx'||ext==='xls'){
-      const reader=new FileReader();
-      reader.onload=e=>{
-        try{
-          const wb=XLSX.read(e.target.result,{type:"array"});
-          const sheet=wb.Sheets[wb.SheetNames[0]];
-          const data=XLSX.utils.sheet_to_json(sheet);
-          const rows=mapRows(data);
-          if(rows.length){
-            setShips(rows);setSqlOk(true);
-            setOffA(new Set());setOffG(new Set());setOffC(new Set());
-            notify(`✓ Загружено ${rows.length} строк из Excel`,'ok');
-          }else{
-            notify('Файл прочитан но строк с выручкой > 0 не найдено. Проверьте названия колонок.','err');
-          }
-        }catch(err){notify('Ошибка чтения Excel: '+err.message,'err')}
-      };
-      reader.readAsArrayBuffer(file);
-      return;
-    }
-
-    /* CSV/TSV/TXT: try multiple encodings */
-    const tryRead=(encoding)=>{
-      const reader=new FileReader();
-      reader.onload=e=>{
-        let txt=e.target.result;
-        /* Remove BOM */
-        if(txt.charCodeAt(0)===0xFEFF) txt=txt.slice(1);
-
-        const delim=detectDelimiter(txt);
-        const parsed=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:delim});
-
-        if(!parsed.data||parsed.data.length===0){
-          if(encoding==='UTF-8'){
-            tryRead('windows-1251');
-          }else{
-            notify('Не удалось распарсить файл. Попробуйте пересохранить как CSV UTF-8.','err');
-          }
-          return;
-        }
-
-        /* Debug: show found columns */
-        const cols=parsed.meta?.fields||Object.keys(parsed.data[0]||{});
-        console.log('Найдены колонки:', cols);
-        console.log('Разделитель:', delim==='\\t'?'TAB':delim);
-        console.log('Первая строка:', parsed.data[0]);
-
-        const rows=mapRows(parsed.data);
-
-        if(rows.length){
-          setShips(rows);setSqlOk(true);
-          setOffA(new Set());setOffG(new Set());setOffC(new Set());
-          notify(`✓ Загружено ${rows.length} строк (разделитель: ${delim==='\t'?'TAB':delim===';'?';':','})`, 'ok');
-        }else{
-          /* Check if columns just didn't match */
-          const colList=cols.slice(0,5).join(', ');
-          if(encoding==='UTF-8'){
-            tryRead('windows-1251');
-          }else{
-            notify(`Файл прочитан (${parsed.data.length} строк), но не удалось найти нужные колонки. Найдены: ${colList}...`, 'err');
-          }
-        }
-      };
-      reader.readAsText(file, encoding);
-    };
-    tryRead('UTF-8');
-  },[]);
-
-  /* Map raw row object to our format - tries many column name variants */
+  /* File loaders */
   function mapRows(data){
     return data.map(r=>{
-      const g=(...ks)=>{for(const k of ks){const v=r[k]; if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()} return null};
+      const g=(...ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()}return null};
       return{
-        orderId: g("Код заявки","Код_заявки","ORDER_ID","orderId")||"",
-        client:  g("Клиент","Client_Name","client","Клиент ")||"",
-        gpGroup: g("Товарная группа","Товарная_группа","GP_Group","gpGroup")||"",
-        gpName:  g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name","gpName")||"",
-        gpId:    g("Код_ГП","Код ГП","GP_ID","gpId","TOV_ID")||"",
-        qty:     parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","Отгружено ГП","GP_Qty","qty")),
-        revenue: parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Выручка по ГП","Revenue_RUR","revenue")),
-        rawCost: parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад","rawCost")),
-        normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех","normCost")),
-        transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт","transport")),
+        orderId:g("Код заявки","Код_заявки","ORDER_ID")||"",
+        date:g("Дата заявки (отгрузки)","Дата_заявки","Order_Date","orderDate")||"",
+        client:g("Клиент","Client_Name","Клиент ")||"",
+        gpGroup:g("Товарная группа","Товарная_группа","GP_Group")||"",
+        gpName:g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name")||"",
+        gpId:String(g("Код_ГП","Код ГП","GP_ID","TOV_ID")||""),
+        qty:parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","GP_Qty")),
+        revenue:parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Revenue_RUR")),
+        rawCost:parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад")),
+        normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех")),
+        transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт")),
       };
     }).filter(r=>r.revenue>0);
   }
 
-  /* ── XLSX areas loader ── */
-  const loadAreas=useCallback(file=>{
-    const reader=new FileReader();
-    reader.onload=e=>{
-      try{
-        const wb=XLSX.read(e.target.result,{type:"array"});
-        const aRows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
-          id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
-          name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
-          fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
-        })).filter(a=>a.id);
-        let mp=[];
-        if(wb.SheetNames.length>1){
-          mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
-            tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||r["tovId"]||""),
-            areaId:String(r["Код_участка"]||r["Код участка"]||r["areaId"]||""),
-          })).filter(m=>m.tovId&&m.areaId);
-        }
-        if(aRows.length){
-          setAreas(aRows);if(mp.length)setGpArea(mp);setAreaOk(true);setOffA(new Set());
-          notify(`✓ Загружено ${aRows.length} участков, ${mp.length} привязок ГП`,'ok');
-        }else{
-          notify('Не найдены участки. Проверьте колонки: Код_участка, Название_участка, Пост_затраты_месяц','err');
-        }
-      }catch(err){notify('Ошибка чтения: '+err.message,'err')}
-    };
-    reader.readAsArrayBuffer(file);
+  const loadSQL=useCallback(file=>{
+    const ext=file.name.split('.').pop().toLowerCase();
+    if(ext==='xlsx'||ext==='xls'){
+      const rd=new FileReader();rd.onload=e=>{try{
+        const wb=XLSX.read(e.target.result,{type:'array'});
+        const rows=mapRows(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]));
+        if(rows.length){setShips(rows);setSqlOk(true);setOffA(new Set());setOffG(new Set());setOffC(new Set());
+          notify(`✓ ${rows.length} строк из Excel`,'ok')}
+        else notify('Строк с выручкой > 0 не найдено','err');
+      }catch(err){notify('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);return;
+    }
+    const tryEnc=enc=>{const rd=new FileReader();rd.onload=e=>{
+      let txt=e.target.result;if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);
+      const d=detectDelim(txt);const p=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:d});
+      if(!p.data?.length){if(enc==='UTF-8')tryEnc('windows-1251');else notify('Не удалось прочитать','err');return}
+      const rows=mapRows(p.data);
+      if(rows.length){setShips(rows);setSqlOk(true);setOffA(new Set());setOffG(new Set());setOffC(new Set());
+        notify(`✓ ${rows.length} строк (${d==='\t'?'TAB':d})`,'ok')}
+      else{if(enc==='UTF-8')tryEnc('windows-1251');
+        else{const c=(p.meta?.fields||[]).slice(0,4).join(', ');notify(`Колонки не совпали. Найдены: ${c}...`,'err')}}
+    };rd.readAsText(file,enc)};tryEnc('UTF-8');
   },[]);
 
-  /* ── Derived data ── */
-  const allGroups=useMemo(()=>{
-    const m=new Map();
-    ships.forEach(s=>{
-      if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});
-      m.get(s.gpGroup).gpIds.add(s.gpId);
-    });
-    return[...m.values()];
-  },[ships]);
+  const loadAreas=useCallback(file=>{
+    const rd=new FileReader();rd.onload=e=>{try{
+      const wb=XLSX.read(e.target.result,{type:'array'});
+      const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
+        id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
+        name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
+        fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
+      })).filter(a=>a.id);
+      let mp=[];
+      if(wb.SheetNames.length>1)mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
+        tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||""),
+        areaId:String(r["Код_участка"]||r["Код участка"]||""),
+      })).filter(m=>m.tovId&&m.areaId);
+      if(a.length){setAreas(a);if(mp.length)setGpArea(mp);setAreaOk(true);setOffA(new Set());
+        notify(`✓ ${a.length} участков, ${mp.length} привязок`,'ok')}
+      else notify('Не найдены участки','err');
+    }catch(err){notify('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);
+  },[]);
 
+  /* ═══ DERIVED ═══ */
+  const allGroups=useMemo(()=>{const m=new Map();ships.forEach(s=>{if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});m.get(s.gpGroup).gpIds.add(s.gpId)});return[...m.values()]},[ships]);
   const allClients=useMemo(()=>[...new Set(ships.map(s=>s.client))].sort(),[ships]);
-
   const gpa=useMemo(()=>{const m=new Map();gpArea.forEach(g=>m.set(String(g.tovId),g.areaId));return m},[gpArea]);
-  const g2a=useMemo(()=>{
-    const m=new Map();
-    allGroups.forEach(g=>{const ids=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(ids.length)m.set(g.id,ids[0])});
-    return m;
-  },[allGroups,gpa]);
-
-  const eog=useMemo(()=>{
-    const s=new Set(offG);
-    allGroups.forEach(g=>{const a=g2a.get(g.id);if(a&&offA.has(a))s.add(g.id)});
-    return s;
-  },[offA,offG,allGroups,g2a]);
-
+  const g2a=useMemo(()=>{const m=new Map();allGroups.forEach(g=>{const ids=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(ids.length)m.set(g.id,ids[0])});return m},[allGroups,gpa]);
+  const eog=useMemo(()=>{const s=new Set(offG);allGroups.forEach(g=>{const a=g2a.get(g.id);if(a&&offA.has(a))s.add(g.id)});return s},[offA,offG,allGroups,g2a]);
   const active=useMemo(()=>ships.filter(s=>!eog.has(s.gpGroup)&&!offC.has(s.client)),[ships,eog,offC]);
 
   const calc=useCallback(sh=>{
-    const rev=sh.reduce((a,s)=>a+s.revenue,0);
-    const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    const cm1=rev-vc;
-    const aa=new Set();
-    sh.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)aa.add(a)});
+    const rev=sh.reduce((a,s)=>a+s.revenue,0),vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0),cm1=rev-vc;
+    const aa=new Set();sh.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)aa.add(a)});
     const fc=areas.filter(a=>aa.has(a.id)).reduce((x,a)=>x+a.fixedCost,0);
     return{rev,vc,cm1,cm2:cm1-fc,fc,m1:rev>0?cm1/rev:0,m2:rev>0?(cm1-fc)/rev:0};
   },[areas,gpa,g2a]);
@@ -332,238 +237,252 @@ function Dashboard(){
   const changed=offA.size>0||offG.size>0||offC.size>0;
 
   const gStats=useMemo(()=>allGroups.map(g=>{
-    const sh=active.filter(s=>s.gpGroup===g.id);
-    const rev=sh.reduce((a,s)=>a+s.revenue,0);
-    const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
+    const sh=active.filter(s=>s.gpGroup===g.id);const rev=sh.reduce((a,s)=>a+s.revenue,0);const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
     const aId=g2a.get(g.id);const area=areas.find(a=>a.id===aId);
     return{...g,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,areaName:area?.name||"—",off:eog.has(g.id)};
   }).sort((a,b)=>b.rev-a.rev),[allGroups,active,g2a,areas,eog]);
 
   const cStats=useMemo(()=>allClients.map(c=>{
-    const sh=active.filter(s=>s.client===c);
-    const rev=sh.reduce((a,s)=>a+s.revenue,0);
-    const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,
-      groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:offC.has(c)};
+    const sh=active.filter(s=>s.client===c);const rev=sh.reduce((a,s)=>a+s.revenue,0);const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
+    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:offC.has(c)};
   }).sort((a,b)=>b.rev-a.rev),[allClients,active,offC]);
 
   const aStats=useMemo(()=>areas.map(a=>{
     const gIds=gpArea.filter(m=>m.areaId===a.id).map(m=>String(m.tovId));
     const gNames=new Set();allGroups.forEach(g=>{if(g2a.get(g.id)===a.id)gNames.add(g.id)});
     const sh=active.filter(s=>gIds.includes(String(s.gpId))||gNames.has(s.gpGroup));
-    const rev=sh.reduce((x,s)=>x+s.revenue,0);
-    const vc=sh.reduce((x,s)=>x+s.rawCost+s.normCost+s.transport,0);
+    const rev=sh.reduce((x,s)=>x+s.revenue,0);const vc=sh.reduce((x,s)=>x+s.rawCost+s.normCost+s.transport,0);
     return{...a,rev,vc,cm1:rev-vc,cm2:rev-vc-a.fixedCost,on:!offA.has(a.id),cnt:sh.length};
   }),[areas,gpArea,active,allGroups,g2a,offA]);
 
   const maxGR=Math.max(...gStats.map(g=>g.rev),1);
   const maxCR=Math.max(...cStats.map(c=>c.rev),1);
-  const accents=["#2563eb","#059669","#d97706","#7c3aed","#dc2626"];
 
-  const tabBtn=(t,lbl)=>(
-    <button onClick={()=>setTab(t)} style={{
-      padding:"7px 22px",borderRadius:8,border:"none",cursor:"pointer",fontSize:12.5,...mono,
-      transition:"all 0.2s",background:tab===t?"#1a1a18":"transparent",color:tab===t?"#fff":"#888",
-    }}>{lbl}</button>
-  );
+  /* Filtered chips */
+  const filteredClients=useMemo(()=>{
+    if(!searchC)return allClients;
+    const q=searchC.toLowerCase();return allClients.filter(c=>c.toLowerCase().includes(q));
+  },[allClients,searchC]);
+  const filteredGroups=useMemo(()=>{
+    if(!searchG)return allGroups;
+    const q=searchG.toLowerCase();return allGroups.filter(g=>g.name.toLowerCase().includes(q));
+  },[allGroups,searchG]);
 
-  const th={padding:"10px 14px",textAlign:"left",color:"#8a8780",fontSize:10.5,
-    textTransform:"uppercase",letterSpacing:1.5,...mono,fontWeight:500,background:"#fff"};
-  const td={padding:"11px 14px"};
+  const disabledCount=offA.size+offG.size+offC.size;
+  const accents=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#ec4899','#14b8a6','#6366f1'];
 
-  return(
-    <div>
-      {/* Toast */}
-      {toast&&<Toast key={toast.key} msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+  const tabStyle=t=>({
+    padding:'8px 20px',borderRadius:8,border:'none',cursor:'pointer',fontSize:13,fontWeight:600,fontFamily:'var(--sans)',
+    transition:'all .15s',background:tab===t?'var(--text)':'transparent',color:tab===t?'#fff':'var(--text3)',
+  });
 
-      {/* Header */}
-      <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:28,flexWrap:"wrap",gap:16}}>
-        <div>
-          <h1 style={{fontSize:28,fontWeight:700,margin:0,...serif,letterSpacing:-0.5}}>Портфельный анализ</h1>
-          <p style={{fontSize:12,color:"#8a8780",marginTop:4,...mono,letterSpacing:0.5}}>
-            What‑if сценарии · Ступенчатая маржа · Покрытие постоянных затрат
-          </p>
-        </div>
-        <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
-          <FileBtn label="SQL данные (.csv / .xlsx)" accept=".csv,.tsv,.txt,.xlsx,.xls" onLoad={loadSQL} loaded={sqlOk}/>
-          <FileBtn label="Участки (.xlsx)" accept=".xlsx,.xls" onLoad={loadAreas} loaded={areaOk}/>
-        </div>
+  const inputStyle={padding:'5px 10px',borderRadius:8,border:'1px solid var(--border)',fontSize:12,fontFamily:'var(--sans)',
+    outline:'none',width:160,background:'#f9fafb',color:'var(--text)'};
+
+  const thS={padding:'10px 14px',textAlign:'left',color:'var(--text3)',fontSize:11,fontWeight:600,
+    textTransform:'uppercase',letterSpacing:.8,fontFamily:'var(--sans)',background:'#fafbfc',
+    borderBottom:'2px solid var(--border)',position:'sticky',top:0,zIndex:1};
+  const tdS={padding:'10px 14px',borderBottom:'1px solid var(--border2)'};
+
+  return <div style={{maxWidth:1400,margin:'0 auto',padding:'24px 28px'}}>
+    {toast&&<Toast key={toast.key} msg={toast.msg} type={toast.type} onClose={()=>setToast(null)}/>}
+
+    {/* ── HEADER ── */}
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:12}}>
+      <div style={{display:'flex',alignItems:'baseline',gap:16,flexWrap:'wrap'}}>
+        <h1 style={{fontSize:22,fontWeight:700,letterSpacing:-.3}}>Портфельный анализ</h1>
+        <span style={{fontSize:13,color:'var(--text3)',...S.mono,background:'#f3f4f6',padding:'4px 12px',borderRadius:8}}>
+          {period.label}
+        </span>
       </div>
-
-      {/* Tabs */}
-      <div style={{display:"flex",gap:2,marginBottom:24,background:"#f0efe8",borderRadius:10,padding:3,width:"fit-content"}}>
-        {tabBtn("overview","Обзор")}
-        {tabBtn("groups","Тов. группы")}
-        {tabBtn("clients","Клиенты")}
-        {tabBtn("areas","Участки")}
-      </div>
-
-      {/* Scenario */}
-      <div style={{background:"#fff",border:"1px solid #e8e6df",borderRadius:14,padding:"18px 22px",marginBottom:24,boxShadow:"0 1px 3px rgba(0,0,0,0.03)"}}>
-        <div style={{fontSize:10,color:"#8a8780",textTransform:"uppercase",letterSpacing:2,marginBottom:14,...mono}}>
-          Сценарий — нажмите чтобы включить / отключить
-        </div>
-        <div style={{display:"flex",flexDirection:"column",gap:12}}>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:"#aaa",width:70,...mono,flexShrink:0}}>Участки</span>
-            {areas.map((a,i)=><Toggle key={a.id} active={!offA.has(a.id)} onClick={()=>tog(offA,setOffA,a.id)}
-              accent={accents[i%accents.length]}>{a.name.length>28?a.name.slice(0,28)+"…":a.name}</Toggle>)}
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:"#aaa",width:70,...mono,flexShrink:0}}>Группы</span>
-            {allGroups.map(g=><Toggle key={g.id} active={!eog.has(g.id)} onClick={()=>tog(offG,setOffG,g.id)}
-              accent="#2563eb">{g.name}</Toggle>)}
-          </div>
-          <div style={{display:"flex",alignItems:"center",gap:8,flexWrap:"wrap"}}>
-            <span style={{fontSize:11,color:"#aaa",width:70,...mono,flexShrink:0}}>Клиенты</span>
-            {allClients.map(c=><Toggle key={c} active={!offC.has(c)} onClick={()=>tog(offC,setOffC,c)}
-              accent="#059669">{c}</Toggle>)}
-          </div>
-        </div>
-        {changed&&<button onClick={()=>{setOffA(new Set());setOffG(new Set());setOffC(new Set())}}
-          style={{marginTop:14,padding:"5px 16px",borderRadius:8,border:"1px solid #fca5a5",
-            background:"#fff",color:"#dc2626",cursor:"pointer",fontSize:12,...mono}}>
-          ↺ Сбросить
-        </button>}
-      </div>
-
-      {/* KPIs */}
-      <div className="fi" style={{display:"flex",gap:14,marginBottom:24,flexWrap:"wrap"}}>
-        <Metric label="Выручка" value={fmt(cur.rev)+" ₽"} delta={changed?cur.rev-base.rev:undefined}/>
-        <Metric label="Маржа 1" value={fmt(cur.cm1)+" ₽"} sub={pct(cur.m1)} delta={changed?cur.cm1-base.cm1:undefined}/>
-        <Metric label="Пост. затраты" value={fmt(cur.fc)+" ₽"} delta={changed?cur.fc-base.fc:undefined}/>
-        <Metric label="Маржа 2" value={fmt(cur.cm2)+" ₽"} sub={pct(cur.m2)} delta={changed?cur.cm2-base.cm2:undefined} warn={cur.cm2<0}/>
-      </div>
-
-      {/* Impact */}
-      {changed&&(
-        <div className="fi" style={{
-          background:cur.cm2>=base.cm2?"#f0fdf4":"#fef2f2",
-          border:`1px solid ${cur.cm2>=base.cm2?"#86efac":"#fca5a5"}`,
-          borderRadius:14,padding:"16px 22px",marginBottom:24,fontSize:14,
-        }}>
-          <strong style={{color:cur.cm2>=base.cm2?"#059669":"#dc2626"}}>
-            {cur.cm2>=base.cm2?"✓ Сценарий улучшает":"⚠ Сценарий ухудшает"}
-          </strong>{" "}итоговую маржу на <strong style={mono}>{fmtF(Math.abs(cur.cm2-base.cm2))}</strong>
-          {cur.cm2<base.cm2&&cur.fc<base.fc&&
-            <div style={{marginTop:8,fontSize:13,color:"#b45309"}}>⚡ Постоянные снизились на {fmtF(base.fc-cur.fc)}, но потеря маржи 1 перевесила экономию</div>}
-          {cur.cm2>=base.cm2&&
-            <div style={{marginTop:8,fontSize:13,color:"#047857"}}>Экономия постоянных: {fmtF(base.fc-cur.fc)} · Δ маржи 1: {fmtF(cur.cm1-base.cm1)}</div>}
-        </div>
-      )}
-
-      {/* ── OVERVIEW ── */}
-      {tab==="overview"&&(
-        <div className="fi" style={{background:"#fff",border:"1px solid #e8e6df",borderRadius:14,padding:24,boxShadow:"0 1px 3px rgba(0,0,0,0.03)"}}>
-          <h3 style={{fontSize:16,fontWeight:600,marginBottom:20,...serif}}>Ступенчатый P&L</h3>
-          {[
-            {l:"Выручка",v:cur.rev,c:"#2563eb"},
-            {l:"— Сырьё и материалы",v:-active.reduce((a,s)=>a+s.rawCost,0),c:"#ef4444"},
-            {l:"— Нормативы цеха",v:-active.reduce((a,s)=>a+s.normCost,0),c:"#f97316"},
-            {l:"— Транспорт",v:-active.reduce((a,s)=>a+s.transport,0),c:"#eab308"},
-            {l:"Маржа 1 (contribution)",v:cur.cm1,c:"#059669",bold:true},
-            {l:"— Постоянные затраты участков",v:-cur.fc,c:"#7c3aed"},
-            {l:"Маржа 2 (после постоянных)",v:cur.cm2,c:cur.cm2>=0?"#0d9488":"#dc2626",bold:true},
-          ].map((r,i)=>(
-            <div key={i} style={{display:"flex",alignItems:"center",gap:16,padding:"10px 0",
-              borderBottom:r.bold?"2px solid #e8e6df":"1px solid #f5f5f0"}}>
-              <div style={{width:260,fontSize:14,color:r.bold?"#1a1a18":"#666",fontWeight:r.bold?600:400}}>{r.l}</div>
-              <HBar value={r.v} max={cur.rev} color={r.c} w={260}/>
-              <div style={{...mono,fontSize:14,color:r.v<0?"#dc2626":"#1a1a18",minWidth:140,textAlign:"right",fontWeight:r.bold?600:400}}>
-                {fmtF(r.v)}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ── GROUPS ── */}
-      {tab==="groups"&&(
-        <div className="fi" style={{background:"#fff",border:"1px solid #e8e6df",borderRadius:14,padding:24,boxShadow:"0 1px 3px rgba(0,0,0,0.03)",overflowX:"auto"}}>
-          <h3 style={{fontSize:16,fontWeight:600,marginBottom:18,...serif}}>Товарные группы</h3>
-          <table><thead><tr>
-            {["Группа","Участок","Выручка","Перем. затраты","Маржа 1","Рент.",""].map((h,i)=>
-              <th key={i} style={th}>{h}</th>)}
-          </tr></thead><tbody>
-            {gStats.map(g=>(
-              <tr key={g.id} style={{opacity:g.off?0.3:1,transition:"opacity 0.3s"}}>
-                <td style={{...td,fontWeight:600}}>{g.name}</td>
-                <td style={{...td,color:"#888",fontSize:12}}>{g.areaName.length>22?g.areaName.slice(0,22)+"…":g.areaName}</td>
-                <td style={{...td,...mono}}>{fmt(g.rev)}</td>
-                <td style={{...td,...mono,color:"#dc2626"}}>{fmt(g.vc)}</td>
-                <td style={{...td,...mono,color:g.cm>=0?"#059669":"#dc2626",fontWeight:600}}>{fmt(g.cm)}</td>
-                <td style={td}><Badge val={g.margin}/></td>
-                <td style={td}><HBar value={g.rev} max={maxGR} color="#2563eb" w={110}/></td>
-              </tr>
-            ))}
-          </tbody></table>
-        </div>
-      )}
-
-      {/* ── CLIENTS ── */}
-      {tab==="clients"&&(
-        <div className="fi" style={{background:"#fff",border:"1px solid #e8e6df",borderRadius:14,padding:24,boxShadow:"0 1px 3px rgba(0,0,0,0.03)",overflowX:"auto"}}>
-          <h3 style={{fontSize:16,fontWeight:600,marginBottom:18,...serif}}>Клиенты</h3>
-          <table><thead><tr>
-            {["Клиент","Групп","Выручка","Маржа 1","Рент.","Доля",""].map((h,i)=>
-              <th key={i} style={th}>{h}</th>)}
-          </tr></thead><tbody>
-            {cStats.map(c=>(
-              <tr key={c.id} style={{opacity:c.off?0.3:1,transition:"opacity 0.3s"}}>
-                <td style={{...td,fontWeight:600}}>{c.name}</td>
-                <td style={{...td,color:"#888",textAlign:"center"}}>{c.groups}</td>
-                <td style={{...td,...mono}}>{fmt(c.rev)}</td>
-                <td style={{...td,...mono,color:c.cm>=0?"#059669":"#dc2626",fontWeight:600}}>{fmt(c.cm)}</td>
-                <td style={td}><Badge val={c.margin}/></td>
-                <td style={{...td,...mono,fontSize:12,color:"#888"}}>{cur.rev>0?pct(c.rev/cur.rev):"—"}</td>
-                <td style={td}><HBar value={c.rev} max={maxCR} color="#059669" w={110}/></td>
-              </tr>
-            ))}
-          </tbody></table>
-        </div>
-      )}
-
-      {/* ── AREAS ── */}
-      {tab==="areas"&&(
-        <div className="fi" style={{display:"flex",gap:16,flexWrap:"wrap"}}>
-          {aStats.map(a=>(
-            <div key={a.id} style={{
-              flex:"1 1 320px",background:"#fff",
-              border:`1.5px solid ${a.cm2<0&&a.on?"#fca5a5":"#e8e6df"}`,
-              borderRadius:14,padding:24,opacity:a.on?1:0.35,transition:"opacity 0.3s",
-              boxShadow:"0 1px 3px rgba(0,0,0,0.03)",
-            }}>
-              <h4 style={{fontSize:16,fontWeight:600,marginBottom:4,...serif}}>{a.name}</h4>
-              <div style={{fontSize:12,color:"#8a8780",marginBottom:18,...mono}}>
-                {a.cnt} отгрузок · Пост.: {fmtF(a.fixedCost)}
-              </div>
-              {[{l:"Выручка",v:a.rev},{l:"Маржа 1",v:a.cm1},{l:"Маржа 2",v:a.cm2}].map((r,i)=>(
-                <div key={i} style={{display:"flex",justifyContent:"space-between",padding:"6px 0"}}>
-                  <span style={{fontSize:13,color:"#666"}}>{r.l}</span>
-                  <span style={{...mono,fontSize:15,fontWeight:600,color:r.v<0?"#dc2626":"#1a1a18"}}>{fmtF(r.v)}</span>
-                </div>
-              ))}
-              {a.cm2<0&&a.on&&(
-                <div style={{marginTop:14,padding:"10px 14px",background:"#fef2f2",borderRadius:10,fontSize:12.5,color:"#b91c1c",lineHeight:1.5}}>
-                  ⚠ Маржа 1 ({fmtF(a.cm1)}) не покрывает постоянные ({fmtF(a.fixedCost)})
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div style={{marginTop:36,padding:"14px 0",borderTop:"1px solid #e8e6df",fontSize:11,color:"#b0b0a0",...mono,
-        display:"flex",justifyContent:"space-between",flexWrap:"wrap",gap:8}}>
-        <span>{sqlOk?"✓ SQL загружены":"◦ Демо-данные"} · {areaOk?"✓ Участки загружены":"◦ Участки: демо"}</span>
-        <span>{ships.length} строк · {allClients.length} клиентов · {allGroups.length} групп</span>
+      <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+        <FileBtn label="SQL данные" accept=".csv,.tsv,.txt,.xlsx,.xls" onLoad={loadSQL} loaded={sqlOk}/>
+        <FileBtn label="Участки (.xlsx)" accept=".xlsx,.xls" onLoad={loadAreas} loaded={areaOk}/>
       </div>
     </div>
-  );
+
+    {/* ── TABS ── */}
+    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20,flexWrap:'wrap',gap:12}}>
+      <div style={{display:'flex',gap:2,background:'#edeef2',borderRadius:10,padding:3}}>
+        {[['overview','Обзор'],['groups','Группы'],['clients','Клиенты'],['areas','Участки']].map(([k,l])=>
+          <button key={k} style={tabStyle(k)} onClick={()=>setTab(k)}>{l}</button>)}
+      </div>
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        {changed&&<span style={{fontSize:12,...S.mono,color:'var(--red)',background:'var(--red-bg)',
+          padding:'3px 10px',borderRadius:8}}>{disabledCount} отключено</span>}
+        <button onClick={()=>setScenarioOpen(p=>!p)} style={{
+          padding:'6px 14px',borderRadius:8,border:'1px solid var(--border)',background:'var(--card)',
+          cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)',color:'var(--text2)',
+        }}>{scenarioOpen?'▴ Скрыть сценарий':'▾ Настроить сценарий'}</button>
+      </div>
+    </div>
+
+    {/* ── SCENARIO ── */}
+    {scenarioOpen&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,
+      padding:16,marginBottom:20,boxShadow:'var(--shadow)'}}>
+      {/* Areas */}
+      <div style={{marginBottom:12}}>
+        <div style={{fontSize:11,fontWeight:600,color:'var(--text3)',marginBottom:8,textTransform:'uppercase',letterSpacing:.5}}>Участки</div>
+        <div style={{display:'flex',gap:6,flexWrap:'wrap'}}>
+          {areas.map((a,i)=><Chip key={a.id} active={!offA.has(a.id)} onClick={()=>tog(offA,setOffA,a.id)}
+            accent={accents[i%accents.length]}>{a.name}</Chip>)}
+        </div>
+      </div>
+      {/* Groups */}
+      <div style={{marginBottom:12}}>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+          <span style={{fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>Товарные группы</span>
+          {allGroups.length>8&&<input placeholder="Поиск…" value={searchG} onChange={e=>setSearchG(e.target.value)} style={inputStyle}/>}
+          {offG.size>0&&<button onClick={()=>setOffG(new Set())} style={{fontSize:11,color:'var(--blue)',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--sans)'}}>Включить все</button>}
+        </div>
+        <div style={{display:'flex',gap:5,flexWrap:'wrap',maxHeight:120,overflowY:'auto',paddingRight:4}}>
+          {filteredGroups.map(g=><Chip key={g.id} active={!eog.has(g.id)} onClick={()=>tog(offG,setOffG,g.id)}
+            accent="var(--blue)">{g.name}</Chip>)}
+        </div>
+      </div>
+      {/* Clients */}
+      <div>
+        <div style={{display:'flex',alignItems:'center',gap:12,marginBottom:8}}>
+          <span style={{fontSize:11,fontWeight:600,color:'var(--text3)',textTransform:'uppercase',letterSpacing:.5}}>Клиенты</span>
+          {allClients.length>8&&<input placeholder="Поиск…" value={searchC} onChange={e=>setSearchC(e.target.value)} style={inputStyle}/>}
+          {offC.size>0&&<button onClick={()=>setOffC(new Set())} style={{fontSize:11,color:'var(--green)',background:'none',border:'none',cursor:'pointer',fontFamily:'var(--sans)'}}>Включить все</button>}
+        </div>
+        <div style={{display:'flex',gap:5,flexWrap:'wrap',maxHeight:120,overflowY:'auto',paddingRight:4}}>
+          {filteredClients.map(c=><Chip key={c} active={!offC.has(c)} onClick={()=>tog(offC,setOffC,c)}
+            accent="var(--green)">{c}</Chip>)}
+        </div>
+      </div>
+      {changed&&<div style={{marginTop:12,borderTop:'1px solid var(--border2)',paddingTop:10}}>
+        <button onClick={()=>{setOffA(new Set());setOffG(new Set());setOffC(new Set())}}
+          style={{padding:'5px 14px',borderRadius:8,border:'1px solid #fecaca',background:'var(--card)',
+            color:'var(--red)',cursor:'pointer',fontSize:12,fontWeight:500,fontFamily:'var(--sans)'}}>
+          ↺ Сбросить всё
+        </button>
+      </div>}
+    </div>}
+
+    {/* ── KPI ── */}
+    <div className="fu" style={{display:'flex',gap:12,marginBottom:20,flexWrap:'wrap'}}>
+      <KPI label="Выручка" value={fmt(cur.rev)+" ₽"} delta={changed?cur.rev-base.rev:undefined}/>
+      <KPI label="Маржа 1" value={fmt(cur.cm1)+" ₽"} sub={pct(cur.m1)} delta={changed?cur.cm1-base.cm1:undefined}/>
+      <KPI label="Пост. затраты" value={fmt(cur.fc)+" ₽"} delta={changed?cur.fc-base.fc:undefined}/>
+      <KPI label="Маржа 2" value={fmt(cur.cm2)+" ₽"} sub={pct(cur.m2)} delta={changed?cur.cm2-base.cm2:undefined} warn={cur.cm2<0}/>
+    </div>
+
+    {/* ── IMPACT ── */}
+    {changed&&<div className="fu" style={{
+      background:cur.cm2>=base.cm2?'var(--green-bg)':'var(--red-bg)',
+      border:`1px solid ${cur.cm2>=base.cm2?'#86efac':'#fecaca'}`,
+      borderRadius:12,padding:'14px 20px',marginBottom:20,fontSize:13,lineHeight:1.6}}>
+      <strong style={{color:cur.cm2>=base.cm2?'var(--green)':'var(--red)'}}>
+        {cur.cm2>=base.cm2?'✓ Сценарий улучшает':'⚠ Сценарий ухудшает'}
+      </strong>{' '}итоговую маржу на <strong style={S.mono}>{fmtF(Math.abs(cur.cm2-base.cm2))}</strong>
+      {cur.cm2<base.cm2&&cur.fc<base.fc&&<div style={{marginTop:4,color:'var(--amber)'}}>⚡ Постоянные снизились на {fmtF(base.fc-cur.fc)}, но потеря маржи 1 перевесила экономию</div>}
+      {cur.cm2>=base.cm2&&<div style={{marginTop:4,color:'#047857'}}>Экономия: {fmtF(base.fc-cur.fc)} · Δ маржи 1: {fmtF(cur.cm1-base.cm1)}</div>}
+    </div>}
+
+    {/* ═══ TAB CONTENT ═══ */}
+
+    {tab==='overview'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,padding:20,boxShadow:'var(--shadow)'}}>
+      <h3 style={{fontSize:15,fontWeight:700,marginBottom:16}}>Ступенчатый P&L</h3>
+      {[
+        {l:'Выручка',v:cur.rev,c:'var(--blue)'},
+        {l:'— Сырьё',v:-active.reduce((a,s)=>a+s.rawCost,0),c:'var(--red)'},
+        {l:'— Нормативы цеха',v:-active.reduce((a,s)=>a+s.normCost,0),c:'var(--amber)'},
+        {l:'— Транспорт',v:-active.reduce((a,s)=>a+s.transport,0),c:'#eab308'},
+        {l:'= Маржа 1',v:cur.cm1,c:'var(--green)',bold:true},
+        {l:'— Пост. затраты участков',v:-cur.fc,c:'var(--purple)'},
+        {l:'= Маржа 2',v:cur.cm2,c:cur.cm2>=0?'var(--teal)':'var(--red)',bold:true},
+      ].map((r,i)=><div key={i} style={{display:'flex',alignItems:'center',gap:14,padding:'9px 0',
+        borderBottom:r.bold?'2px solid var(--border)':'1px solid var(--border2)'}}>
+        <div style={{width:240,fontSize:13,color:r.bold?'var(--text)':'var(--text2)',fontWeight:r.bold?700:400}}>{r.l}</div>
+        <Bar value={r.v} max={cur.rev} color={r.c} w={240}/>
+        <div style={{...S.mono,fontSize:13,color:r.v<0?'var(--red)':'var(--text)',minWidth:130,textAlign:'right',fontWeight:r.bold?700:400}}>{fmtF(r.v)}</div>
+      </div>)}
+    </div>}
+
+    {tab==='groups'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,boxShadow:'var(--shadow)',overflow:'hidden'}}>
+      <div style={{padding:'16px 20px 0'}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:4}}>Товарные группы</h3>
+        <p style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>{gStats.length} групп</p>
+      </div>
+      <div style={{maxHeight:480,overflowY:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead><tr>
+            {['Группа','Участок','Выручка','Перем.','Маржа 1','Рент.',''].map((h,i)=>
+              <th key={i} style={thS}>{h}</th>)}
+          </tr></thead>
+          <tbody>{gStats.map(g=><tr key={g.id} style={{opacity:g.off?.3:1,transition:'opacity .3s'}}>
+            <td style={{...tdS,fontWeight:600,maxWidth:200}}>{g.name}</td>
+            <td style={{...tdS,color:'var(--text3)',fontSize:12,maxWidth:160}}>{g.areaName.length>20?g.areaName.slice(0,20)+'…':g.areaName}</td>
+            <td style={{...tdS,...S.mono,fontSize:13}}>{fmt(g.rev)}</td>
+            <td style={{...tdS,...S.mono,fontSize:13,color:'var(--red)'}}>{fmt(g.vc)}</td>
+            <td style={{...tdS,...S.mono,fontSize:13,color:g.cm>=0?'var(--green)':'var(--red)',fontWeight:600}}>{fmt(g.cm)}</td>
+            <td style={tdS}><Badge val={g.margin}/></td>
+            <td style={tdS}><Bar value={g.rev} max={maxGR} color="var(--blue)" w={100}/></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {tab==='clients'&&<div className="fu" style={{background:'var(--card)',border:'1px solid var(--border)',borderRadius:12,boxShadow:'var(--shadow)',overflow:'hidden'}}>
+      <div style={{padding:'16px 20px 0'}}>
+        <h3 style={{fontSize:15,fontWeight:700,marginBottom:4}}>Клиенты</h3>
+        <p style={{fontSize:12,color:'var(--text3)',marginBottom:12}}>{cStats.length} клиентов</p>
+      </div>
+      <div style={{maxHeight:480,overflowY:'auto'}}>
+        <table style={{width:'100%',borderCollapse:'collapse'}}>
+          <thead><tr>
+            {['Клиент','Групп','Выручка','Маржа 1','Рент.','Доля',''].map((h,i)=>
+              <th key={i} style={thS}>{h}</th>)}
+          </tr></thead>
+          <tbody>{cStats.map(c=><tr key={c.id} style={{opacity:c.off?.3:1,transition:'opacity .3s'}}>
+            <td style={{...tdS,fontWeight:600,maxWidth:200}}>{c.name}</td>
+            <td style={{...tdS,color:'var(--text3)',textAlign:'center'}}>{c.groups}</td>
+            <td style={{...tdS,...S.mono,fontSize:13}}>{fmt(c.rev)}</td>
+            <td style={{...tdS,...S.mono,fontSize:13,color:c.cm>=0?'var(--green)':'var(--red)',fontWeight:600}}>{fmt(c.cm)}</td>
+            <td style={tdS}><Badge val={c.margin}/></td>
+            <td style={{...tdS,...S.mono,fontSize:12,color:'var(--text3)'}}>{cur.rev>0?pct(c.rev/cur.rev):'—'}</td>
+            <td style={tdS}><Bar value={c.rev} max={maxCR} color="var(--green)" w={100}/></td>
+          </tr>)}</tbody>
+        </table>
+      </div>
+    </div>}
+
+    {tab==='areas'&&<div className="fu" style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(340px,1fr))',gap:14}}>
+      {aStats.map(a=><div key={a.id} style={{
+        background:'var(--card)',border:`1.5px solid ${a.cm2<0&&a.on?'#fecaca':'var(--border)'}`,
+        borderRadius:12,padding:20,opacity:a.on?1:.3,transition:'opacity .3s',boxShadow:'var(--shadow)'}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
+          <div>
+            <h4 style={{fontSize:15,fontWeight:700,marginBottom:2}}>{a.name}</h4>
+            <span style={{fontSize:11,color:'var(--text3)',...S.mono}}>{a.cnt} отгрузок</span>
+          </div>
+          <span style={{fontSize:12,...S.mono,padding:'3px 10px',borderRadius:8,background:'#f3f4f6',color:'var(--text2)'}}>
+            Пост. {fmt(a.fixedCost)}
+          </span>
+        </div>
+        {[{l:'Выручка',v:a.rev},{l:'Маржа 1',v:a.cm1},{l:'Маржа 2',v:a.cm2}].map((r,i)=>
+          <div key={i} style={{display:'flex',justifyContent:'space-between',padding:'5px 0',borderBottom:i<2?'1px solid var(--border2)':'none'}}>
+            <span style={{fontSize:13,color:'var(--text2)'}}>{r.l}</span>
+            <span style={{...S.mono,fontSize:14,fontWeight:600,color:r.v<0?'var(--red)':'var(--text)'}}>{fmtF(r.v)}</span>
+          </div>)}
+        {a.cm2<0&&a.on&&<div style={{marginTop:12,padding:'8px 12px',background:'var(--red-bg)',borderRadius:8,fontSize:12,color:'#b91c1c',lineHeight:1.4}}>
+          ⚠ Маржа 1 ({fmtF(a.cm1)}) не покрывает постоянные ({fmtF(a.fixedCost)})
+        </div>}
+      </div>)}
+    </div>}
+
+    {/* Footer */}
+    <div style={{marginTop:28,padding:'12px 0',borderTop:'1px solid var(--border)',fontSize:11,color:'var(--text3)',...S.mono,
+      display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:8}}>
+      <span>{sqlOk?'✓ Данные загружены':'◦ Демо'} · {areaOk?'✓ Участки':'◦ Участки: демо'}</span>
+      <span>{ships.length} строк · {allClients.length} клиентов · {allGroups.length} групп</span>
+    </div>
+  </div>
 }
 
-ReactDOM.createRoot(document.getElementById('root')).render(<Dashboard/>);
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
 </script>
 </body>
 </html>
