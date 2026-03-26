@@ -16,10 +16,8 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px}
 ::-webkit-scrollbar{width:5px;height:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:9px}
-@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
-.fu{animation:fu .3s ease-out both}
-
-.wrap{max-width:1400px;margin:0 auto;padding:24px 28px}
+@keyframes fu{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}.fu{animation:fu .3s ease-out both}
+.wrap{max-width:1440px;margin:0 auto;padding:24px 28px}
 .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px}
 .header h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
 .file-btns{display:flex;gap:8px;flex-wrap:wrap}
@@ -28,121 +26,96 @@ body{background:var(--bg);color:var(--tx);font-family:var(--sans);font-size:14px
 .file-btn:hover{border-color:var(--blue);color:var(--blue)}
 .file-btn.ok{background:var(--green-bg);border-color:var(--green);color:var(--green)}
 .file-btn input{display:none}
-
 .period-bar{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap}
 .period-bar label{font-size:12px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
-.period-bar input[type=date]{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:13px;
-  font-family:var(--sans);color:var(--tx);background:var(--card);outline:none}
+.period-bar input[type=date]{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:13px;font-family:var(--sans);color:var(--tx);background:var(--card);outline:none}
 .period-bar input[type=date]:focus{border-color:var(--blue)}
 .period-info{font-size:12px;font-family:var(--mono);color:var(--tx3);background:#f3f4f6;padding:4px 12px;border-radius:8px}
-
 .nav{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px}
 .tabs{display:flex;gap:2px;background:#edeef2;border-radius:10px;padding:3px}
-.tab{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;
-  font-family:var(--sans);transition:all .15s;background:transparent;color:var(--tx3)}
+.tab{padding:8px 20px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:600;font-family:var(--sans);transition:all .15s;background:transparent;color:var(--tx3)}
 .tab.on{background:var(--tx);color:#fff}
 .nav-right{display:flex;gap:8px;align-items:center}
 .badge-count{font-size:12px;font-family:var(--mono);color:var(--red);background:var(--red-bg);padding:3px 10px;border-radius:8px}
-.toggle-sc{padding:6px 14px;border-radius:8px;border:1px solid var(--brd);background:var(--card);cursor:pointer;
-  font-size:12px;font-weight:500;font-family:var(--sans);color:var(--tx2)}
-
+.toggle-sc{padding:6px 14px;border-radius:8px;border:1px solid var(--brd);background:var(--card);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--sans);color:var(--tx2)}
 .sc-panel{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:16px;margin-bottom:18px;box-shadow:var(--sh)}
-.sc-section{margin-bottom:12px}
-.sc-section:last-child{margin-bottom:0}
+.sc-section{margin-bottom:12px}.sc-section:last-child{margin-bottom:0}
 .sc-head{display:flex;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
 .sc-label{font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px}
-.sc-search{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:12px;font-family:var(--sans);
-  outline:none;width:160px;background:#f9fafb;color:var(--tx)}
+.sc-search{padding:5px 10px;border-radius:8px;border:1px solid var(--brd);font-size:12px;font-family:var(--sans);outline:none;width:160px;background:#f9fafb;color:var(--tx)}
 .sc-search:focus{border-color:var(--blue)}
-.sc-enableall{font-size:11px;color:var(--blue);background:none;border:none;cursor:pointer;font-family:var(--sans)}
+.sc-enableall{font-size:11px;background:none;border:none;cursor:pointer;font-family:var(--sans)}
 .sc-chips{display:flex;gap:5px;flex-wrap:wrap;max-height:110px;overflow-y:auto;padding-right:4px}
-.chip{padding:4px 12px;border-radius:16px;cursor:pointer;font-size:12px;font-family:var(--sans);font-weight:500;
-  transition:all .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:20px;border:1.5px solid transparent}
-.chip.on{color:#fff}
-.chip.off{background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb;text-decoration:line-through;opacity:.65}
+.chip{padding:4px 12px;border-radius:16px;cursor:pointer;font-size:12px;font-family:var(--sans);font-weight:500;transition:all .2s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap;line-height:20px;border:1.5px solid transparent}
+.chip.on{color:#fff}.chip.off{background:#f3f4f6;color:#9ca3af;border:1.5px solid #e5e7eb;text-decoration:line-through;opacity:.65}
 .sc-reset{margin-top:12px;border-top:1px solid var(--brd2);padding-top:10px}
-.sc-reset button{padding:5px 14px;border-radius:8px;border:1px solid #fecaca;background:var(--card);
-  color:var(--red);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--sans)}
-
+.sc-reset button{padding:5px 14px;border-radius:8px;border:1px solid #fecaca;background:var(--card);color:var(--red);cursor:pointer;font-size:12px;font-weight:500;font-family:var(--sans)}
 .kpi-row{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
-.kpi{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:16px 20px;
-  flex:1 1 180px;min-width:160px;box-shadow:var(--sh)}
+.kpi{background:var(--card);border:1px solid var(--brd);border-radius:12px;padding:16px 20px;flex:1 1 160px;min-width:140px;box-shadow:var(--sh)}
 .kpi.warn{background:var(--red-bg);border-color:#fecaca}
-.kpi-label{font-size:11px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:var(--mono)}
-.kpi-val{font-size:24px;font-weight:700;letter-spacing:-.5px}
-.kpi-sub{font-size:12px;color:var(--tx3);margin-top:2px;font-family:var(--mono)}
-.kpi-delta{font-size:11px;margin-top:6px;font-family:var(--mono);display:inline-flex;align-items:center;gap:3px;
-  padding:2px 8px;border-radius:8px;font-weight:500}
-.kpi-delta.up{color:var(--green);background:var(--green-bg)}
-.kpi-delta.down{color:var(--red);background:var(--red-bg)}
-
+.kpi-label{font-size:10px;color:var(--tx3);font-weight:600;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;font-family:var(--mono)}
+.kpi-val{font-size:22px;font-weight:700;letter-spacing:-.5px}
+.kpi-sub{font-size:11px;color:var(--tx3);margin-top:2px;font-family:var(--mono)}
+.kpi-delta{font-size:10px;margin-top:6px;font-family:var(--mono);display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:8px;font-weight:500}
+.kpi-delta.up{color:var(--green);background:var(--green-bg)}.kpi-delta.down{color:var(--red);background:var(--red-bg)}
 .impact{border-radius:12px;padding:14px 20px;margin-bottom:18px;font-size:13px;line-height:1.6}
-.impact.good{background:var(--green-bg);border:1px solid #86efac}
-.impact.bad{background:var(--red-bg);border:1px solid #fecaca}
-
+.impact.good{background:var(--green-bg);border:1px solid #86efac}.impact.bad{background:var(--red-bg);border:1px solid #fecaca}
 .card{background:var(--card);border:1px solid var(--brd);border-radius:12px;box-shadow:var(--sh);overflow:hidden}
-.card-head{padding:16px 20px 0}
-.card-head h3{font-size:15px;font-weight:700;margin-bottom:2px}
-.card-head p{font-size:12px;color:var(--tx3);margin-bottom:10px}
+.card-head{padding:16px 20px 0}.card-head h3{font-size:15px;font-weight:700;margin-bottom:2px}.card-head p{font-size:12px;color:var(--tx3);margin-bottom:10px}
 .card-scroll{max-height:500px;overflow-y:auto}
 table{width:100%;border-collapse:collapse}
-th{padding:10px 14px;text-align:left;color:var(--tx3);font-size:11px;font-weight:600;text-transform:uppercase;
-  letter-spacing:.8px;font-family:var(--sans);background:#fafbfc;border-bottom:2px solid var(--brd);position:sticky;top:0;z-index:1}
-td{padding:10px 14px;border-bottom:1px solid var(--brd2)}
-tr.dim{opacity:.3}
-
+th{padding:10px 14px;text-align:left;color:var(--tx3);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;font-family:var(--sans);background:#fafbfc;border-bottom:2px solid var(--brd);position:sticky;top:0;z-index:1}
+td{padding:10px 14px;border-bottom:1px solid var(--brd2)}tr.dim{opacity:.3}
 .bar-wrap{height:10px;border-radius:5px;overflow:hidden;flex-shrink:0;background:#f3f4f6}
 .bar-fill{height:100%;border-radius:5px;transition:width .4s}
 .badge-pct{padding:2px 8px;border-radius:8px;font-size:11px;font-family:var(--mono);font-weight:500;display:inline-block}
-
-.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:14px}
+.area-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(360px,1fr));gap:14px}
 .area-card{background:var(--card);border-radius:12px;padding:20px;box-shadow:var(--sh);transition:opacity .3s}
-.area-card.off{opacity:.3}
-.area-card.warn-b{border:1.5px solid #fecaca}
-.area-card:not(.warn-b){border:1.5px solid var(--brd)}
-.area-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px}
-.area-card h4{font-size:15px;font-weight:700;margin-bottom:2px}
+.area-card.off{opacity:.3}.area-card.warn-b{border:1.5px solid #fecaca}.area-card:not(.warn-b){border:1.5px solid var(--brd)}
+.area-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;gap:8px}
+.area-card h4{font-size:14px;font-weight:700;margin-bottom:2px}
+.area-meta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.area-meta-tag{font-size:11px;font-family:var(--mono);padding:3px 10px;border-radius:8px}
 .area-row{display:flex;justify-content:space-between;padding:5px 0}
 .area-row:not(:last-child){border-bottom:1px solid var(--brd2)}
 .area-warn{margin-top:12px;padding:8px 12px;background:var(--red-bg);border-radius:8px;font-size:12px;color:#b91c1c;line-height:1.4}
-
-/* Waterfall */
+.area-cost-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:10px 0;padding:10px;background:#f9fafb;border-radius:8px}
+.area-cost-item{text-align:center}
+.area-cost-item .lbl{font-size:10px;color:var(--tx3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:2px}
+.area-cost-item .val{font-size:13px;font-weight:600;font-family:var(--mono)}
 .wf-row{display:flex;align-items:center;gap:14px;padding:9px 0}
-.wf-row:not(.bold){border-bottom:1px solid var(--brd2)}
-.wf-row.bold{border-bottom:2px solid var(--brd)}
-.wf-label{width:240px;font-size:13px;color:var(--tx2)}
-.wf-row.bold .wf-label{color:var(--tx);font-weight:700}
-.wf-bar{width:240px}
-.wf-val{font-family:var(--mono);font-size:13px;min-width:130px;text-align:right}
-.wf-row.bold .wf-val{font-weight:700}
-
-.footer{margin-top:28px;padding:12px 0;border-top:1px solid var(--brd);font-size:11px;color:var(--tx3);
-  font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
-
-.toast{position:fixed;top:16px;right:16px;padding:10px 18px;border-radius:10px;font-size:13px;font-family:var(--sans);
-  z-index:999;max-width:460px;line-height:1.5;box-shadow:var(--sh2);animation:fu .3s ease-out both}
+.wf-row:not(.bold){border-bottom:1px solid var(--brd2)}.wf-row.bold{border-bottom:2px solid var(--brd)}
+.wf-label{width:260px;font-size:13px;color:var(--tx2)}.wf-row.bold .wf-label{color:var(--tx);font-weight:700}
+.wf-bar{width:220px}.wf-val{font-family:var(--mono);font-size:13px;min-width:130px;text-align:right}.wf-row.bold .wf-val{font-weight:700}
+.footer{margin-top:28px;padding:12px 0;border-top:1px solid var(--brd);font-size:11px;color:var(--tx3);font-family:var(--mono);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.toast{position:fixed;top:16px;right:16px;padding:10px 18px;border-radius:10px;font-size:13px;font-family:var(--sans);z-index:999;max-width:460px;line-height:1.5;box-shadow:var(--sh2);animation:fu .3s ease-out both}
 .toast.ok{background:var(--green-bg);border:1px solid #86efac;color:var(--green)}
 .toast.err{background:var(--red-bg);border:1px solid #fecaca;color:var(--red)}
 .toast.info{background:var(--blue-bg);border:1px solid #93c5fd;color:var(--blue)}
+/* utilization gauge */
+.gauge{width:100%;height:6px;background:#e5e7eb;border-radius:3px;overflow:hidden;margin-top:4px}
+.gauge-fill{height:100%;border-radius:3px;transition:width .4s}
 </style>
 </head>
 <body>
 <div class="wrap" id="app"></div>
 <script>
-/* ══════════════════════════════════════════════════════
-   STATE
-   ══════════════════════════════════════════════════════ */
-const DEMO_AREAS=[
-  {id:"A1",name:"Участок №1 — Сухие смеси",fixedCost:820000},
-  {id:"A2",name:"Участок №2 — Жидкие формы",fixedCost:1150000},
-  {id:"A3",name:"Участок №3 — Фасовка",fixedCost:540000},
+/* ══════ STATE ══════ */
+/* Area monthly rows: {name, month, util, directCost, distLogic, distNoLogic, outputKg, marginIncome} */
+const DEMO_AD=[
+  {name:"Сухие смеси",month:"2025-12",util:73,directCost:5470000,distLogic:2928000,distNoLogic:1656000,outputKg:45000,marginIncome:9560000},
+  {name:"Сухие смеси",month:"2026-01",util:68,directCost:5100000,distLogic:2800000,distNoLogic:1600000,outputKg:41000,marginIncome:8900000},
+  {name:"Жидкие формы",month:"2025-12",util:60,directCost:6341000,distLogic:3394000,distNoLogic:1920000,outputKg:32000,marginIncome:11275000},
+  {name:"Жидкие формы",month:"2026-01",util:55,directCost:5900000,distLogic:3100000,distNoLogic:1800000,outputKg:29000,marginIncome:10200000},
+  {name:"Фасовка",month:"2025-12",util:87,directCost:1178000,distLogic:631000,distNoLogic:357000,outputKg:19800,marginIncome:2338000},
+  {name:"Фасовка",month:"2026-01",util:82,directCost:1100000,distLogic:590000,distNoLogic:330000,outputKg:18500,marginIncome:2150000},
 ];
 const DEMO_GP=[
-  {tovId:"GP01",areaId:"A1"},{tovId:"GP02",areaId:"A1"},
-  {tovId:"GP03",areaId:"A2"},{tovId:"GP04",areaId:"A2"},
-  {tovId:"GP05",areaId:"A3"},
+  {tovId:"GP01",areaName:"Сухие смеси"},{tovId:"GP02",areaName:"Сухие смеси"},
+  {tovId:"GP03",areaName:"Жидкие формы"},{tovId:"GP04",areaName:"Жидкие формы"},
+  {tovId:"GP05",areaName:"Фасовка"},
 ];
-const DEMO_SHIPS=[
+const DS=[
   {orderId:"Z001",date:"2025-12-05",client:"ООО «Агротех»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4200,revenue:2800000,rawCost:1120000,normCost:280000,transport:85000},
   {orderId:"Z002",date:"2025-12-08",client:"АО «ФудМастер»",gpGroup:"Премиум линейка",gpName:"Смесь Альфа 25кг",gpId:"GP01",qty:4600,revenue:3100000,rawCost:1240000,normCost:310000,transport:62000},
   {orderId:"Z003",date:"2025-12-10",client:"ТОО «КазПром»",gpGroup:"Премиум линейка",gpName:"Смесь Бета 10кг",gpId:"GP01",qty:2200,revenue:1500000,rawCost:600000,normCost:150000,transport:120000},
@@ -161,7 +134,7 @@ const DEMO_SHIPS=[
 ];
 
 let S={
-  areas:DEMO_AREAS, gpArea:DEMO_GP, allShips:DEMO_SHIPS,
+  areaData:DEMO_AD, gpArea:DEMO_GP, allShips:DS,
   sqlOk:false, areaOk:false,
   offA:new Set(), offG:new Set(), offC:new Set(),
   tab:'overview', scOpen:true,
@@ -177,232 +150,198 @@ const parseNum=v=>{if(v==null||v==='')return 0;let s=String(v).trim().replace(/\
 const detectDelim=t=>{const l=(t.split(/\r?\n/)[0])||'';if(l.includes('\t'))return'\t';if(l.includes(';'))return';';return','};
 const esc=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const accents=['#3b82f6','#10b981','#f59e0b','#8b5cf6','#ef4444','#ec4899','#14b8a6','#6366f1'];
-
 function tog(set,id){set.has(id)?set.delete(id):set.add(id)}
+function normalizeMonth(d){if(!d)return'';const s=String(d).trim();if(/^\d{4}-\d{2}$/.test(s))return s;if(/^\d{4}-\d{2}-\d{2}/.test(s))return s.slice(0,7);if(/^\d{2}\.\d{2}\.\d{4}/.test(s)){const p=s.split('.');return p[2]+'-'+p[1]}if(/^\d{2}\.\d{4}/.test(s)){const p=s.split('.');return p[1]+'-'+p[0]}const dt=new Date(s);if(!isNaN(dt)){const m=dt.getMonth()+1;return dt.getFullYear()+'-'+(m<10?'0':'')+m}return''}
+function dateToMonth(d){return d?d.slice(0,7):''}
 
-/* Date-filtered ships */
-function getShips(){
-  let d=S.allShips;
-  if(S.dateFrom){const f=S.dateFrom;d=d.filter(s=>s.date>=f)}
-  if(S.dateTo){const t=S.dateTo;d=d.filter(s=>s.date<=t)}
-  return d;
+/* Get unique area names */
+function getAreaNames(){return[...new Set(S.areaData.map(r=>r.name))]}
+
+/* Aggregate area data for months within period */
+function getAreaAgg(areaName){
+  const fromM=dateToMonth(S.dateFrom),toM=dateToMonth(S.dateTo);
+  const rows=S.areaData.filter(r=>r.name===areaName&&(!fromM||r.month>=fromM)&&(!toM||r.month<=toM));
+  if(!rows.length)return{directCost:0,distLogic:0,distNoLogic:0,outputKg:0,marginIncome:0,avgUtil:0,months:0};
+  return{
+    directCost:rows.reduce((a,r)=>a+r.directCost,0),
+    distLogic:rows.reduce((a,r)=>a+r.distLogic,0),
+    distNoLogic:rows.reduce((a,r)=>a+r.distNoLogic,0),
+    outputKg:rows.reduce((a,r)=>a+r.outputKg,0),
+    marginIncome:rows.reduce((a,r)=>a+r.marginIncome,0),
+    avgUtil:rows.reduce((a,r)=>a+r.util,0)/rows.length,
+    months:rows.length,
+  };
 }
-function getGroups(ships){
-  const m=new Map();
-  ships.forEach(s=>{if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});m.get(s.gpGroup).gpIds.add(s.gpId)});
-  return[...m.values()];
-}
+
+/* Ships filtered by period */
+function getShips(){let d=S.allShips;if(S.dateFrom)d=d.filter(s=>s.date>=S.dateFrom);if(S.dateTo)d=d.filter(s=>s.date<=S.dateTo);return d}
+function getGroups(ships){const m=new Map();ships.forEach(s=>{if(!m.has(s.gpGroup))m.set(s.gpGroup,{id:s.gpGroup,name:s.gpGroup,gpIds:new Set()});m.get(s.gpGroup).gpIds.add(s.gpId)});return[...m.values()]}
 function getClients(ships){return[...new Set(ships.map(s=>s.client))].sort()}
-function gpaMap(){const m=new Map();S.gpArea.forEach(g=>m.set(String(g.tovId),g.areaId));return m}
-function g2aMap(groups,gpa){
-  const m=new Map();groups.forEach(g=>{const ids=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(ids.length)m.set(g.id,ids[0])});return m;
-}
-function effOff(groups,g2a){
-  const s=new Set(S.offG);groups.forEach(g=>{const a=g2a.get(g.id);if(a&&S.offA.has(a))s.add(g.id)});return s;
-}
-function calcM(ships,gpa,g2a){
-  const rev=ships.reduce((a,s)=>a+s.revenue,0),vc=ships.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0),cm1=rev-vc;
-  const aa=new Set();ships.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)aa.add(a)});
-  const fc=S.areas.filter(a=>aa.has(a.id)).reduce((x,a)=>x+a.fixedCost,0);
-  return{rev,vc,cm1,cm2:cm1-fc,fc,m1:rev>0?cm1/rev:0,m2:rev>0?(cm1-fc)/rev:0};
+
+/* GP → Area name mapping */
+function gpaMap(){const m=new Map();S.gpArea.forEach(g=>m.set(String(g.tovId),g.areaName));return m}
+function g2aMap(groups,gpa){const m=new Map();groups.forEach(g=>{const nms=[...g.gpIds].map(id=>gpa.get(String(id))).filter(Boolean);if(nms.length)m.set(g.id,nms[0])});return m}
+function effOff(groups,g2a){const s=new Set(S.offG);groups.forEach(g=>{const a=g2a.get(g.id);if(a&&S.offA.has(a))s.add(g.id)});return s}
+
+function calcFull(ships,gpa,g2a){
+  const rev=ships.reduce((a,s)=>a+s.revenue,0);
+  const vc=ships.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
+  const cm1=rev-vc;
+  /* Active areas */
+  const activeAreas=new Set();
+  ships.forEach(s=>{const a=gpa.get(String(s.gpId))||g2a.get(s.gpGroup);if(a)activeAreas.add(a)});
+  let totDirect=0,totDistL=0,totDistNL=0;
+  activeAreas.forEach(name=>{
+    if(S.offA.has(name))return;
+    const ag=getAreaAgg(name);
+    totDirect+=ag.directCost;totDistL+=ag.distLogic;totDistNL+=ag.distNoLogic;
+  });
+  const cm2=cm1-totDirect;
+  const cm3=cm2-totDistL;
+  const opResult=cm3-totDistNL;
+  return{rev,vc,cm1,cm2,cm3,opResult,totDirect,totDistL,totDistNL,
+    m1:rev>0?cm1/rev:0,m2:rev>0?cm2/rev:0,m3:rev>0?cm3/rev:0,mOp:rev>0?opResult/rev:0};
 }
 
-function bar(value,max,color,w){
-  const r=max>0?Math.min(Math.abs(value)/max,1):0;
-  return`<div class="bar-wrap" style="width:${w||140}px"><div class="bar-fill" style="width:${r*100}%;background:${value<0?'#fca5a5':color}"></div></div>`;
-}
-function badge(val){
-  const bg=val>.3?'var(--green-bg)':val>.15?'var(--amber-bg)':'var(--red-bg)';
-  const c=val>.3?'var(--green)':val>.15?'var(--amber)':'var(--red)';
-  return`<span class="badge-pct" style="background:${bg};color:${c}">${pct(val)}</span>`;
-}
+function bar(value,max,color,w){const r=max>0?Math.min(Math.abs(value)/max,1):0;return`<div class="bar-wrap" style="width:${w||140}px"><div class="bar-fill" style="width:${r*100}%;background:${value<0?'#fca5a5':color}"></div></div>`}
+function badge(val){const bg=val>.3?'var(--green-bg)':val>.15?'var(--amber-bg)':'var(--red-bg)';const c=val>.3?'var(--green)':val>.15?'var(--amber)':'var(--red)';return`<span class="badge-pct" style="background:${bg};color:${c}">${pct(val)}</span>`}
+function utilColor(u){if(u>=80)return'var(--green)';if(u>=50)return'var(--amber)';return'var(--red)'}
 
-/* Toast */
 let toastTimer;
-function toast(msg,type){
-  let el=document.getElementById('toast');
-  if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el)}
-  el.className='toast '+(type||'info');el.textContent=msg;
-  clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.remove(),5000);
-}
+function toast(msg,type){let el=document.getElementById('toast');if(!el){el=document.createElement('div');el.id='toast';document.body.appendChild(el)}el.className='toast '+(type||'info');el.textContent=msg;clearTimeout(toastTimer);toastTimer=setTimeout(()=>el.remove(),5000)}
 
 /* ══════ FILE LOADERS ══════ */
 function mapRows(data){
   return data.map(r=>{
     const g=(...ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()}return null};
-    return{
-      orderId:g("Код заявки","Код_заявки","ORDER_ID")||"",
-      date:g("Дата заявки (отгрузки)","Дата_заявки","Order_Date","orderDate")||"",
-      client:g("Клиент","Client_Name","Клиент ")||"",
-      gpGroup:g("Товарная группа","Товарная_группа","GP_Group")||"",
+    return{orderId:g("Код заявки","Код_заявки","ORDER_ID")||"",date:g("Дата заявки (отгрузки)","Дата_заявки","Order_Date")||"",
+      client:g("Клиент","Client_Name","Клиент ")||"",gpGroup:g("Товарная группа","Товарная_группа","GP_Group")||"",
       gpName:g("Готовая продукция (ГП)","Готовая_продукция_(ГП)","Готовая продукция","GP_Name")||"",
       gpId:String(g("Код_ГП","Код ГП","GP_ID","TOV_ID")||""),
       qty:parseNum(g("Отгружено ГП (кг)","Отгружено_ГП_(кг)","GP_Qty")),
       revenue:parseNum(g("Выручка по ГП (RUR)","Выручка_по_ГП_(RUR)","Revenue_RUR")),
       rawCost:parseNum(g("Прямые_Затраты_Сырье_Склад","Прямые Затраты Сырье Склад")),
       normCost:parseNum(g("Прямые_Затраты_Нормы_Цех","Прямые Затраты Нормы Цех")),
-      transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт")),
-    };
+      transport:parseNum(g("Прямые_Затраты_Транспорт","Прямые Затраты Транспорт"))};
   }).filter(r=>r.revenue>0);
 }
-
-function normalizeDate(d){
-  if(!d)return'';
-  /* Handle dd.mm.yyyy, yyyy-mm-dd, mm/dd/yyyy */
-  if(/^\d{2}\.\d{2}\.\d{4}/.test(d)){const p=d.split('.');return p[2]+'-'+p[1]+'-'+p[0]}
-  if(/^\d{4}-\d{2}-\d{2}/.test(d))return d.slice(0,10);
-  const dt=new Date(d);if(!isNaN(dt))return dt.toISOString().slice(0,10);
-  return'';
-}
+function normalizeDate(d){if(!d)return'';if(/^\d{2}\.\d{2}\.\d{4}/.test(d)){const p=d.split('.');return p[2]+'-'+p[1]+'-'+p[0]}if(/^\d{4}-\d{2}-\d{2}/.test(d))return d.slice(0,10);const dt=new Date(d);if(!isNaN(dt))return dt.toISOString().slice(0,10);return''}
 
 function loadSQL(file){
   const ext=file.name.split('.').pop().toLowerCase();
-  if(ext==='xlsx'||ext==='xls'){
-    const rd=new FileReader();rd.onload=e=>{try{
-      const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});
-      const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false});
-      const rows=mapRows(data);rows.forEach(r=>r.date=normalizeDate(r.date));
-      if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();
-        autoSetDates();render();toast('✓ '+rows.length+' строк из Excel','ok')}
-      else toast('Строк с выручкой > 0 не найдено','err');
-    }catch(err){toast('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);return;
-  }
-  const tryEnc=enc=>{const rd=new FileReader();rd.onload=e=>{
-    let txt=e.target.result;if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);
-    const dl=detectDelim(txt);const p=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:dl});
-    if(!p.data?.length){if(enc==='UTF-8')tryEnc('windows-1251');else toast('Не удалось прочитать','err');return}
-    const rows=mapRows(p.data);rows.forEach(r=>r.date=normalizeDate(r.date));
-    if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();
-      autoSetDates();render();toast('✓ '+rows.length+' строк','ok')}
-    else{if(enc==='UTF-8')tryEnc('windows-1251');
-      else{const c=(p.meta?.fields||[]).slice(0,4).join(', ');toast('Колонки не совпали: '+c,'err')}}
-  };rd.readAsText(file,enc)};tryEnc('UTF-8');
+  if(ext==='xlsx'||ext==='xls'){const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array',cellDates:true});const data=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{raw:false});const rows=mapRows(data);rows.forEach(r=>r.date=normalizeDate(r.date));if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();autoSetDates();render();toast('✓ '+rows.length+' строк','ok')}else toast('Строк не найдено','err')}catch(err){toast('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);return}
+  const tryEnc=enc=>{const rd=new FileReader();rd.onload=e=>{let txt=e.target.result;if(txt.charCodeAt(0)===0xFEFF)txt=txt.slice(1);const dl=detectDelim(txt);const p=Papa.parse(txt,{header:true,skipEmptyLines:true,delimiter:dl});if(!p.data?.length){if(enc==='UTF-8')tryEnc('windows-1251');else toast('Не удалось прочитать','err');return}const rows=mapRows(p.data);rows.forEach(r=>r.date=normalizeDate(r.date));if(rows.length){S.allShips=rows;S.sqlOk=true;S.offA=new Set();S.offG=new Set();S.offC=new Set();autoSetDates();render();toast('✓ '+rows.length+' строк','ok')}else{if(enc==='UTF-8')tryEnc('windows-1251');else{const c=(p.meta?.fields||[]).slice(0,4).join(', ');toast('Колонки не совпали: '+c,'err')}}};rd.readAsText(file,enc)};tryEnc('UTF-8');
 }
 
 function loadAreas(file){
   const rd=new FileReader();rd.onload=e=>{try{
     const wb=XLSX.read(e.target.result,{type:'array'});
-    const a=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]).map(r=>({
-      id:String(r["Код_участка"]||r["Код участка"]||r["id"]||""),
-      name:String(r["Название_участка"]||r["Название участка"]||r["name"]||""),
-      fixedCost:parseNum(r["Пост_затраты_месяц"]||r["Пост затраты месяц"]||r["fixedCost"]),
-    })).filter(a=>a.id);
-    let mp=[];
-    if(wb.SheetNames.length>1)mp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
-      tovId:String(r["TOV_ID"]||r["Код_ГП"]||r["Код ГП"]||""),
-      areaId:String(r["Код_участка"]||r["Код участка"]||""),
-    })).filter(m=>m.tovId&&m.areaId);
-    if(a.length){S.areas=a;if(mp.length)S.gpArea=mp;S.areaOk=true;S.offA=new Set();
-      render();toast('✓ '+a.length+' участков','ok')}
-    else toast('Участки не найдены','err');
+    /* Sheet 1: area monthly data */
+    const s1=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]]);
+    const ad=s1.map(r=>{
+      const g=(...ks)=>{for(const k of ks){const v=r[k];if(v!==undefined&&v!==null&&String(v).trim()!=='')return String(v).trim()}return null};
+      return{
+        name:g("Наименование_участка","Наименование участка","name")||"",
+        month:normalizeMonth(g("Месяц","month")||""),
+        util:parseNum(g("Загруженность","Загруженность_процент","util")),
+        directCost:parseNum(g("Прямые_затраты","Прямые затраты","Прямые","directCost")),
+        distLogic:parseNum(g("Распред_с_логикой","Распред с логикой","Распределенные с логикой","distLogic")),
+        distNoLogic:parseNum(g("Распред_без_логики","Распред без логики","Распределенные без логики","distNoLogic")),
+        outputKg:parseNum(g("Объем_выпуска_кг","Объем выпуска кг","Объем_выпуска","outputKg")),
+        marginIncome:parseNum(g("Маржинальный_доход","Маржинальный доход","marginIncome")),
+      };
+    }).filter(r=>r.name&&r.month);
+
+    /* Sheet 2: GP mapping */
+    let gp=[];
+    if(wb.SheetNames.length>1){
+      gp=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[1]]).map(r=>({
+        tovId:String(r["Код_ГП"]||r["Код ГП"]||r["TOV_ID"]||r["tovId"]||""),
+        areaName:String(r["Наименование_участка"]||r["Наименование участка"]||r["areaName"]||""),
+      })).filter(m=>m.tovId&&m.areaName);
+    }
+
+    if(ad.length){S.areaData=ad;if(gp.length)S.gpArea=gp;S.areaOk=true;S.offA=new Set();
+      render();toast('✓ '+ad.length+' строк участков, '+gp.length+' привязок ГП','ok')}
+    else toast('Данные участков не найдены. Проверьте заголовки.','err');
   }catch(err){toast('Ошибка: '+err.message,'err')}};rd.readAsArrayBuffer(file);
 }
 
-function autoSetDates(){
-  const dates=S.allShips.map(s=>s.date).filter(Boolean).sort();
-  if(dates.length){S.dateFrom=dates[0];S.dateTo=dates[dates.length-1]}
-}
+function autoSetDates(){const dates=S.allShips.map(s=>s.date).filter(Boolean).sort();if(dates.length){S.dateFrom=dates[0];S.dateTo=dates[dates.length-1]}}
 autoSetDates();
 
-/* ══════════════════════════════════════════════════════
-   RENDER
-   ══════════════════════════════════════════════════════ */
+/* ══════ RENDER ══════ */
 function render(){
   const ships=getShips();
   const groups=getGroups(ships);
   const clients=getClients(ships);
-  const gpa_m=gpaMap();
-  const g2a_m=g2aMap(groups,gpa_m);
+  const gpa_m=gpaMap(),g2a_m=g2aMap(groups,gpa_m);
   const eog=effOff(groups,g2a_m);
   const active=ships.filter(s=>!eog.has(s.gpGroup)&&!S.offC.has(s.client));
-  const base=calcM(ships,gpa_m,g2a_m);
-  const cur=calcM(active,gpa_m,g2a_m);
+  const base=calcFull(ships,gpa_m,g2a_m);
+  const cur=calcFull(active,gpa_m,g2a_m);
   const changed=S.offA.size>0||S.offG.size>0||S.offC.size>0;
   const disN=S.offA.size+S.offG.size+S.offC.size;
+  const areaNames=getAreaNames();
 
-  /* Stats */
   const gStats=groups.map(g=>{
     const sh=active.filter(s=>s.gpGroup===g.id);const rev=sh.reduce((a,s)=>a+s.revenue,0);
     const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    const aId=g2a_m.get(g.id);const area=S.areas.find(a=>a.id===aId);
-    return{...g,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,areaName:area?.name||'—',off:eog.has(g.id)};
+    const aN=g2a_m.get(g.id);
+    return{...g,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,areaName:aN||'—',off:eog.has(g.id)};
   }).sort((a,b)=>b.rev-a.rev);
-
   const cStats=clients.map(c=>{
     const sh=active.filter(s=>s.client===c);const rev=sh.reduce((a,s)=>a+s.revenue,0);
     const vc=sh.reduce((a,s)=>a+s.rawCost+s.normCost+s.transport,0);
-    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,
-      groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:S.offC.has(c)};
+    return{id:c,name:c,rev,vc,cm:rev-vc,margin:rev>0?(rev-vc)/rev:0,groups:[...new Set(sh.map(s=>s.gpGroup))].length,off:S.offC.has(c)};
   }).sort((a,b)=>b.rev-a.rev);
 
-  const aStats=S.areas.map(a=>{
-    const gIds=S.gpArea.filter(m=>m.areaId===a.id).map(m=>String(m.tovId));
-    const gN=new Set();groups.forEach(g=>{if(g2a_m.get(g.id)===a.id)gN.add(g.id)});
+  /* Area stats */
+  const aStats=areaNames.map(name=>{
+    const ag=getAreaAgg(name);
+    const gIds=S.gpArea.filter(m=>m.areaName===name).map(m=>String(m.tovId));
+    const gN=new Set();groups.forEach(g=>{if(g2a_m.get(g.id)===name)gN.add(g.id)});
     const sh=active.filter(s=>gIds.includes(String(s.gpId))||gN.has(s.gpGroup));
     const rev=sh.reduce((x,s)=>x+s.revenue,0);const vc=sh.reduce((x,s)=>x+s.rawCost+s.normCost+s.transport,0);
-    return{...a,rev,vc,cm1:rev-vc,cm2:rev-vc-a.fixedCost,on:!S.offA.has(a.id),cnt:sh.length};
+    const cm1=rev-vc;
+    const on=!S.offA.has(name);
+    return{name,...ag,rev,vc,cm1,cm2:cm1-ag.directCost,cm3:cm1-ag.directCost-ag.distLogic,
+      opResult:cm1-ag.directCost-ag.distLogic-ag.distNoLogic,on,cnt:sh.length};
   });
 
   const maxGR=Math.max(...gStats.map(g=>g.rev),1);
   const maxCR=Math.max(...cStats.map(c=>c.rev),1);
-
-  /* Filter chips */
   const fGroups=S.searchG?groups.filter(g=>g.name.toLowerCase().includes(S.searchG.toLowerCase())):groups;
   const fClients=S.searchC?clients.filter(c=>c.toLowerCase().includes(S.searchC.toLowerCase())):clients;
 
-  /* KPI helper */
   function kpi(label,val,sub,delta,warn){
-    let h=`<div class="kpi${warn?' warn':''}"><div class="kpi-label">${label}</div>
-      <div class="kpi-val" style="color:${warn?'var(--red)':'var(--tx)'}">${val}</div>`;
+    let h=`<div class="kpi${warn?' warn':''}"><div class="kpi-label">${label}</div><div class="kpi-val" style="color:${warn?'var(--red)':'var(--tx)'}">${val}</div>`;
     if(sub)h+=`<div class="kpi-sub">${sub}</div>`;
     if(delta!==undefined)h+=`<div class="kpi-delta ${delta>=0?'up':'down'}">${delta>=0?'↑':'↓'} ${fmtF(Math.abs(delta))}</div>`;
     return h+'</div>';
   }
 
   let html='';
-
   /* Header */
-  html+=`<div class="header">
-    <h1>Портфельный анализ</h1>
-    <div class="file-btns">
-      <label class="file-btn${S.sqlOk?' ok':''}"><span>${S.sqlOk?'✓':'↑'} SQL данные</span><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" id="fSQL"></label>
-      <label class="file-btn${S.areaOk?' ok':''}"><span>${S.areaOk?'✓':'↑'} Участки (.xlsx)</span><input type="file" accept=".xlsx,.xls" id="fArea"></label>
-    </div>
-  </div>`;
-
+  html+=`<div class="header"><h1>Портфельный анализ</h1><div class="file-btns">
+    <label class="file-btn${S.sqlOk?' ok':''}"><span>${S.sqlOk?'✓':'↑'} SQL данные</span><input type="file" accept=".csv,.tsv,.txt,.xlsx,.xls" id="fSQL"></label>
+    <label class="file-btn${S.areaOk?' ok':''}"><span>${S.areaOk?'✓':'↑'} Участки (.xlsx)</span><input type="file" accept=".xlsx,.xls" id="fArea"></label>
+  </div></div>`;
   /* Period */
-  html+=`<div class="period-bar">
-    <label>Период:</label>
-    <input type="date" id="dFrom" value="${S.dateFrom}">
-    <span style="color:var(--tx3)">—</span>
-    <input type="date" id="dTo" value="${S.dateTo}">
-    <span class="period-info">${ships.length} записей в периоде</span>
-  </div>`;
-
-  /* Tabs + controls */
-  html+=`<div class="nav">
-    <div class="tabs">
-      ${['overview|Обзор','groups|Группы','clients|Клиенты','areas|Участки'].map(t=>{
-        const[k,l]=t.split('|');return`<button class="tab${S.tab===k?' on':''}" data-tab="${k}">${l}</button>`}).join('')}
-    </div>
-    <div class="nav-right">
-      ${changed?`<span class="badge-count">${disN} отключено</span>`:''}
-      <button class="toggle-sc" id="toggleSc">${S.scOpen?'▴ Скрыть сценарий':'▾ Настроить сценарий'}</button>
-    </div>
-  </div>`;
+  html+=`<div class="period-bar"><label>Период:</label><input type="date" id="dFrom" value="${S.dateFrom}"><span style="color:var(--tx3)">—</span><input type="date" id="dTo" value="${S.dateTo}"><span class="period-info">${ships.length} записей</span></div>`;
+  /* Tabs */
+  html+=`<div class="nav"><div class="tabs">${['overview|Обзор','groups|Группы','clients|Клиенты','areas|Участки'].map(t=>{const[k,l]=t.split('|');return`<button class="tab${S.tab===k?' on':''}" data-tab="${k}">${l}</button>`}).join('')}</div>
+    <div class="nav-right">${changed?`<span class="badge-count">${disN} откл.</span>`:''}<button class="toggle-sc" id="toggleSc">${S.scOpen?'▴ Скрыть сценарий':'▾ Сценарий'}</button></div></div>`;
 
   /* Scenario */
   if(S.scOpen){
     html+=`<div class="sc-panel fu">`;
-    /* Areas */
     html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Участки</span></div>
-      <div class="sc-chips">${S.areas.map((a,i)=>`<button class="chip ${S.offA.has(a.id)?'off':'on'}" style="${S.offA.has(a.id)?'':`background:${accents[i%accents.length]}`}" data-tA="${a.id}">${esc(a.name)}</button>`).join('')}</div></div>`;
-    /* Groups */
+      <div class="sc-chips">${areaNames.map((a,i)=>`<button class="chip ${S.offA.has(a)?'off':'on'}" style="${S.offA.has(a)?'':`background:${accents[i%accents.length]}`}" data-tA="${esc(a)}">${esc(a.length>30?a.slice(0,30)+'…':a)}</button>`).join('')}</div></div>`;
     html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Товарные группы</span>
       ${groups.length>8?`<input class="sc-search" placeholder="Поиск…" id="sG" value="${esc(S.searchG)}">`:''}
-      ${S.offG.size>0?'<button class="sc-enableall" id="enG">Включить все</button>':''}</div>
+      ${S.offG.size>0?'<button class="sc-enableall" id="enG" style="color:var(--blue)">Включить все</button>':''}</div>
       <div class="sc-chips">${fGroups.map(g=>`<button class="chip ${eog.has(g.id)?'off':'on'}" style="${eog.has(g.id)?'':'background:var(--blue)'}" data-tG="${esc(g.id)}">${esc(g.name)}</button>`).join('')}</div></div>`;
-    /* Clients */
     html+=`<div class="sc-section"><div class="sc-head"><span class="sc-label">Клиенты</span>
       ${clients.length>8?`<input class="sc-search" placeholder="Поиск…" id="sC" value="${esc(S.searchC)}">`:''}
       ${S.offC.size>0?'<button class="sc-enableall" id="enC" style="color:var(--green)">Включить все</button>':''}</div>
@@ -415,18 +354,19 @@ function render(){
   html+=`<div class="kpi-row fu">
     ${kpi('Выручка',fmt(cur.rev)+' ₽',null,changed?cur.rev-base.rev:undefined)}
     ${kpi('Маржа 1',fmt(cur.cm1)+' ₽',pct(cur.m1),changed?cur.cm1-base.cm1:undefined)}
-    ${kpi('Пост. затраты',fmt(cur.fc)+' ₽',null,changed?cur.fc-base.fc:undefined)}
-    ${kpi('Маржа 2',fmt(cur.cm2)+' ₽',pct(cur.m2),changed?cur.cm2-base.cm2:undefined,cur.cm2<0)}
+    ${kpi('Маржа 2',fmt(cur.cm2)+' ₽',pct(cur.m2),changed?cur.cm2-base.cm2:undefined)}
+    ${kpi('Маржа 3',fmt(cur.cm3)+' ₽',pct(cur.m3),changed?cur.cm3-base.cm3:undefined)}
+    ${kpi('Опер. результат',fmt(cur.opResult)+' ₽',pct(cur.mOp),changed?cur.opResult-base.opResult:undefined,cur.opResult<0)}
   </div>`;
 
   /* Impact */
   if(changed){
-    const good=cur.cm2>=base.cm2;
+    const good=cur.opResult>=base.opResult;
     html+=`<div class="impact fu ${good?'good':'bad'}">
       <strong style="color:${good?'var(--green)':'var(--red)'}">${good?'✓ Улучшает':'⚠ Ухудшает'}</strong>
-      итоговую маржу на <strong style="font-family:var(--mono)">${fmtF(Math.abs(cur.cm2-base.cm2))}</strong>
-      ${!good&&cur.fc<base.fc?`<div style="margin-top:4px;color:var(--amber)">⚡ Постоянные −${fmtF(base.fc-cur.fc)}, но потеря маржи 1 перевесила</div>`:''}
-      ${good?`<div style="margin-top:4px;color:#047857">Экономия: ${fmtF(base.fc-cur.fc)} · Δ маржи 1: ${fmtF(cur.cm1-base.cm1)}</div>`:''}
+      операционный результат на <strong style="font-family:var(--mono)">${fmtF(Math.abs(cur.opResult-base.opResult))}</strong>
+      ${!good?`<div style="margin-top:4px;color:var(--amber)">Прямые участков: ${fmtF(cur.totDirect)} (было ${fmtF(base.totDirect)}) · Распред. с логикой: ${fmtF(cur.totDistL)} · Нераспред.: ${fmtF(cur.totDistNL)}</div>`:''}
+      ${good?`<div style="margin-top:4px;color:#047857">Экономия прямых: ${fmtF(base.totDirect-cur.totDirect)} · Δ маржи 1: ${fmtF(cur.cm1-base.cm1)}</div>`:''}
     </div>`;
   }
 
@@ -434,43 +374,37 @@ function render(){
   if(S.tab==='overview'){
     const rows=[
       {l:'Выручка',v:cur.rev,c:'var(--blue)'},
-      {l:'— Сырьё',v:-active.reduce((a,s)=>a+s.rawCost,0),c:'var(--red)'},
-      {l:'— Нормативы цеха',v:-active.reduce((a,s)=>a+s.normCost,0),c:'var(--amber)'},
-      {l:'— Транспорт',v:-active.reduce((a,s)=>a+s.transport,0),c:'#eab308'},
+      {l:'— Сырьё (SQL)',v:-active.reduce((a,s)=>a+s.rawCost,0),c:'var(--red)'},
+      {l:'— Нормативы цеха (SQL)',v:-active.reduce((a,s)=>a+s.normCost,0),c:'var(--amber)'},
+      {l:'— Транспорт (SQL)',v:-active.reduce((a,s)=>a+s.transport,0),c:'#eab308'},
       {l:'= Маржа 1',v:cur.cm1,c:'var(--green)',bold:true},
-      {l:'— Пост. затраты',v:-cur.fc,c:'var(--purple)'},
-      {l:'= Маржа 2',v:cur.cm2,c:cur.cm2>=0?'var(--teal)':'var(--red)',bold:true},
+      {l:'— Прямые затраты участков',v:-cur.totDirect,c:'var(--red)'},
+      {l:'= Маржа 2',v:cur.cm2,c:'var(--teal)',bold:true},
+      {l:'— Распред. с логикой',v:-cur.totDistL,c:'var(--purple)'},
+      {l:'= Маржа 3',v:cur.cm3,c:cur.cm3>=0?'var(--green)':'var(--red)',bold:true},
+      {l:'— Распред. без логики (общехоз.)',v:-cur.totDistNL,c:'var(--tx3)'},
+      {l:'= Операционный результат',v:cur.opResult,c:cur.opResult>=0?'var(--teal)':'var(--red)',bold:true},
     ];
-    html+=`<div class="card fu"><div class="card-head"><h3>Ступенчатый P&L</h3></div><div style="padding:0 20px 20px">
-      ${rows.map(r=>`<div class="wf-row${r.bold?' bold':''}">
-        <div class="wf-label">${r.l}</div>
-        <div class="wf-bar">${bar(r.v,cur.rev,r.c,240)}</div>
-        <div class="wf-val" style="color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</div>
-      </div>`).join('')}</div></div>`;
+    html+=`<div class="card fu"><div class="card-head"><h3>Ступенчатый P&L</h3><p>Переменные из SQL · Затраты участков из Excel</p></div><div style="padding:0 20px 20px">
+      ${rows.map(r=>`<div class="wf-row${r.bold?' bold':''}"><div class="wf-label">${r.l}</div><div class="wf-bar">${bar(r.v,cur.rev,r.c,220)}</div><div class="wf-val" style="color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</div></div>`).join('')}</div></div>`;
   }
 
   if(S.tab==='groups'){
     html+=`<div class="card fu"><div class="card-head"><h3>Товарные группы</h3><p>${gStats.length} групп</p></div>
-      <div class="card-scroll"><table><thead><tr>
-        ${['Группа','Участок','Выручка','Перем.','Маржа 1','Рент.',''].map(h=>`<th>${h}</th>`).join('')}
-      </tr></thead><tbody>
+      <div class="card-scroll"><table><thead><tr>${['Группа','Участок','Выручка','Перем.','Маржа 1','Рент.',''].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>
         ${gStats.map(g=>`<tr${g.off?' class="dim"':''}>
           <td style="font-weight:600;max-width:200px">${esc(g.name)}</td>
           <td style="color:var(--tx3);font-size:12px;max-width:160px">${esc(g.areaName.length>22?g.areaName.slice(0,22)+'…':g.areaName)}</td>
           <td style="font-family:var(--mono);font-size:13px">${fmt(g.rev)}</td>
           <td style="font-family:var(--mono);font-size:13px;color:var(--red)">${fmt(g.vc)}</td>
           <td style="font-family:var(--mono);font-size:13px;font-weight:600;color:${g.cm>=0?'var(--green)':'var(--red)'}">${fmt(g.cm)}</td>
-          <td>${badge(g.margin)}</td>
-          <td>${bar(g.rev,maxGR,'var(--blue)',100)}</td>
-        </tr>`).join('')}
+          <td>${badge(g.margin)}</td><td>${bar(g.rev,maxGR,'var(--blue)',100)}</td></tr>`).join('')}
       </tbody></table></div></div>`;
   }
 
   if(S.tab==='clients'){
     html+=`<div class="card fu"><div class="card-head"><h3>Клиенты</h3><p>${cStats.length} клиентов</p></div>
-      <div class="card-scroll"><table><thead><tr>
-        ${['Клиент','Групп','Выручка','Маржа 1','Рент.','Доля',''].map(h=>`<th>${h}</th>`).join('')}
-      </tr></thead><tbody>
+      <div class="card-scroll"><table><thead><tr>${['Клиент','Групп','Выручка','Маржа 1','Рент.','Доля',''].map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>
         ${cStats.map(c=>`<tr${c.off?' class="dim"':''}>
           <td style="font-weight:600;max-width:200px">${esc(c.name)}</td>
           <td style="color:var(--tx3);text-align:center">${c.groups}</td>
@@ -478,59 +412,56 @@ function render(){
           <td style="font-family:var(--mono);font-size:13px;font-weight:600;color:${c.cm>=0?'var(--green)':'var(--red)'}">${fmt(c.cm)}</td>
           <td>${badge(c.margin)}</td>
           <td style="font-family:var(--mono);font-size:12px;color:var(--tx3)">${cur.rev>0?pct(c.rev/cur.rev):'—'}</td>
-          <td>${bar(c.rev,maxCR,'var(--green)',100)}</td>
-        </tr>`).join('')}
+          <td>${bar(c.rev,maxCR,'var(--green)',100)}</td></tr>`).join('')}
       </tbody></table></div></div>`;
   }
 
   if(S.tab==='areas'){
-    html+=`<div class="area-grid fu">${aStats.map(a=>`
-      <div class="area-card${a.on?'':' off'}${a.cm2<0&&a.on?' warn-b':''}">
-        <div class="area-top"><div>
-          <h4>${esc(a.name)}</h4>
-          <span style="font-size:11px;color:var(--tx3);font-family:var(--mono)">${a.cnt} отгрузок</span>
-        </div><span style="font-size:12px;font-family:var(--mono);padding:3px 10px;border-radius:8px;background:#f3f4f6;color:var(--tx2)">Пост. ${fmt(a.fixedCost)}</span></div>
-        ${[{l:'Выручка',v:a.rev},{l:'Маржа 1',v:a.cm1},{l:'Маржа 2',v:a.cm2}].map(r=>`
-          <div class="area-row"><span style="font-size:13px;color:var(--tx2)">${r.l}</span>
-          <span style="font-family:var(--mono);font-size:14px;font-weight:600;color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</span></div>`).join('')}
-        ${a.cm2<0&&a.on?`<div class="area-warn">⚠ Маржа 1 (${fmtF(a.cm1)}) не покрывает постоянные (${fmtF(a.fixedCost)})</div>`:''}
-      </div>`).join('')}</div>`;
+    html+=`<div class="area-grid fu">${aStats.map(a=>{
+      const fin=a.cm1-a.directCost-a.distLogic-a.distNoLogic;
+      return`<div class="area-card${a.on?'':' off'}${fin<0&&a.on?' warn-b':''}">
+        <div class="area-top"><div><h4>${esc(a.name)}</h4>
+          <span style="font-size:11px;color:var(--tx3);font-family:var(--mono)">${a.cnt} отгрузок · ${a.months} мес</span></div></div>
+        <!-- Utilization & Output -->
+        <div class="area-meta">
+          <span class="area-meta-tag" style="background:${a.avgUtil>=80?'var(--green-bg)':a.avgUtil>=50?'var(--amber-bg)':'var(--red-bg)'}; color:${utilColor(a.avgUtil)}">Загрузка: ${a.avgUtil.toFixed(0)}%</span>
+          <span class="area-meta-tag" style="background:#f3f4f6;color:var(--tx2)">Выпуск: ${fmt(a.outputKg)} кг</span>
+        </div>
+        <div class="gauge"><div class="gauge-fill" style="width:${Math.min(a.avgUtil,100)}%;background:${utilColor(a.avgUtil)}"></div></div>
+        <!-- 3 cost types -->
+        <div class="area-cost-grid">
+          <div class="area-cost-item"><div class="lbl">Прямые</div><div class="val" style="color:var(--red)">${fmt(a.directCost)}</div></div>
+          <div class="area-cost-item"><div class="lbl">Распр. лог.</div><div class="val" style="color:var(--purple)">${fmt(a.distLogic)}</div></div>
+          <div class="area-cost-item"><div class="lbl">Общехоз.</div><div class="val" style="color:var(--tx3)">${fmt(a.distNoLogic)}</div></div>
+        </div>
+        <!-- Margins -->
+        ${[{l:'Выручка (отгрузки)',v:a.rev},{l:'Маржа 1',v:a.cm1},{l:'Маржа 2 (−прямые)',v:a.cm2},{l:'Маржа 3 (−распр.лог)',v:a.cm3},{l:'Фин. результат',v:fin}].map(r=>`
+          <div class="area-row"><span style="font-size:12px;color:var(--tx2)">${r.l}</span>
+          <span style="font-family:var(--mono);font-size:13px;font-weight:600;color:${r.v<0?'var(--red)':'var(--tx)'}">${fmtF(r.v)}</span></div>`).join('')}
+        ${fin<0&&a.on?`<div class="area-warn">⚠ Финансовый результат отрицательный: ${fmtF(fin)}</div>`:''}
+      </div>`}).join('')}</div>`;
   }
 
-  /* Footer */
-  html+=`<div class="footer">
-    <span>${S.sqlOk?'✓ Данные загружены':'◦ Демо'} · ${S.areaOk?'✓ Участки':'◦ Участки: демо'}</span>
-    <span>${ships.length} строк · ${clients.length} клиентов · ${groups.length} групп</span>
-  </div>`;
-
-  document.getElementById('app').innerHTML=html;
-  bind();
+  html+=`<div class="footer"><span>${S.sqlOk?'✓ SQL':'◦ Демо'} · ${S.areaOk?'✓ Участки':'◦ Участки: демо'}</span><span>${ships.length} строк · ${clients.length} клиентов · ${groups.length} групп · ${areaNames.length} участков</span></div>`;
+  document.getElementById('app').innerHTML=html;bindEvents();
 }
 
-/* ══════ EVENTS ══════ */
-function bind(){
+function bindEvents(){
   document.getElementById('fSQL')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)loadSQL(f)});
   document.getElementById('fArea')?.addEventListener('change',e=>{const f=e.target.files?.[0];if(f)loadAreas(f)});
   document.getElementById('dFrom')?.addEventListener('change',e=>{S.dateFrom=e.target.value;render()});
   document.getElementById('dTo')?.addEventListener('change',e=>{S.dateTo=e.target.value;render()});
-
   document.querySelectorAll('[data-tab]').forEach(b=>b.addEventListener('click',()=>{S.tab=b.dataset.tab;render()}));
   document.getElementById('toggleSc')?.addEventListener('click',()=>{S.scOpen=!S.scOpen;render()});
-
   document.querySelectorAll('[data-tA]').forEach(b=>b.addEventListener('click',()=>{tog(S.offA,b.dataset.ta);render()}));
   document.querySelectorAll('[data-tG]').forEach(b=>b.addEventListener('click',()=>{tog(S.offG,b.dataset.tg);render()}));
   document.querySelectorAll('[data-tC]').forEach(b=>b.addEventListener('click',()=>{tog(S.offC,b.dataset.tc);render()}));
-
-  document.getElementById('sG')?.addEventListener('input',e=>{S.searchG=e.target.value;render();
-    const el=document.getElementById('sG');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
-  document.getElementById('sC')?.addEventListener('input',e=>{S.searchC=e.target.value;render();
-    const el=document.getElementById('sC');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
-
+  document.getElementById('sG')?.addEventListener('input',e=>{S.searchG=e.target.value;render();const el=document.getElementById('sG');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
+  document.getElementById('sC')?.addEventListener('input',e=>{S.searchC=e.target.value;render();const el=document.getElementById('sC');if(el){el.focus();el.setSelectionRange(el.value.length,el.value.length)}});
   document.getElementById('enG')?.addEventListener('click',()=>{S.offG=new Set();render()});
   document.getElementById('enC')?.addEventListener('click',()=>{S.offC=new Set();render()});
   document.getElementById('resetAll')?.addEventListener('click',()=>{S.offA=new Set();S.offG=new Set();S.offC=new Set();render()});
 }
-
 render();
 </script>
 </body>
