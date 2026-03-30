@@ -172,6 +172,7 @@ function filterShipsByScenario(ships, gpToArea, scenario) {
   const offA = scenario?.offA || new Set();
   const offG = scenario?.offG || new Set();
   const offP = scenario?.offP || new Set();
+  const offCP = scenario?.offCP || new Set();
   const selA = scenario?.selA || '';
   const selG = scenario?.selG || '';
   const selC = scenario?.selC || new Set();
@@ -180,6 +181,8 @@ function filterShipsByScenario(ships, gpToArea, scenario) {
     if(offC.has(s.client)) return false;
     const productKey = getProductKey(s);
     if(productKey && offP.has(productKey)) return false;
+    const clientProductKey = getClientProductKey(s);
+    if(clientProductKey && offCP.has(clientProductKey)) return false;
     const area = gpToArea.get(String(s.gpId));
     if(area && offA.has(area)) return false;
     if(offG.has(s.gpGroup)) return false;
@@ -196,6 +199,7 @@ function filterActiveShips(ships, gpToArea) {
     offG: UI.offG,
     offC: UI.offC,
     offP: UI.offP,
+    offCP: UI.offCP,
     selA: UI.selA,
     selG: UI.selG,
     selC: UI.selC,

@@ -10,6 +10,8 @@
 ═══════════════════════════════════════════════════════════════════*/
 
 /* ═══ STATE ═══ */
+const DEFAULT_HOLDING_MONTHLY_INPUT = '446 млн';
+
 let D = {
   ships: [],       // SQL shipments
   tpRows: [],      // Excel sheet1: TP details
@@ -19,11 +21,12 @@ let D = {
   salesMode: '',
 };
 let UI = {
-  offA: new Set(), offG: new Set(), offC: new Set(), offP: new Set(),
+  offA: new Set(), offG: new Set(), offC: new Set(), offP: new Set(), offCP: new Set(),
   selA: '', selG: '', selC: new Set(),  // selected (include-only) filters
   tab: 'overview', scOpen: false,
   dateFrom: '', dateTo: '',
   searchG: '', searchC: '', searchP: '', searchTP: '',
+  tabSearchG: '', tabSearchC: '', tabSearchCP: '', tabSearchA: '',
   grpSort: 'rev', grpSortDir: 1, grpPage: 0,
   cliSort: 'rev', cliSortDir: 1, cliPage: 0,
   prodSort: 'marginInc', prodSortDir: 1, prodPage: 0,
@@ -32,7 +35,7 @@ let UI = {
   cpNegOnly: false,
   cpOpen: new Set(),
   salesInputMode: 'auto',
-  holdingMonthlyInput: '',
+  holdingMonthlyInput: DEFAULT_HOLDING_MONTHLY_INPUT,
   holdingAllocMode: 'revenue',
   quickMenu: null,
   _selCExpand: false,
@@ -121,11 +124,17 @@ function resetScenarioFilters() {
   UI.offG = new Set();
   UI.offC = new Set();
   UI.offP = new Set();
+  UI.offCP = new Set();
   UI.selA = '';
   UI.selG = '';
   UI.selC = new Set();
   UI._selCSearch = '';
   UI.searchP = '';
+  UI.searchTP = '';
+  UI.tabSearchG = '';
+  UI.tabSearchC = '';
+  UI.tabSearchCP = '';
+  UI.tabSearchA = '';
   UI.grpPage = 0;
   UI.cliPage = 0;
   UI.prodPage = 0;
@@ -328,6 +337,33 @@ function buildProductLabel(item) {
   if (group && group !== name) return `${name} · ${group}`;
   return name;
 }
+function getClientProductKey(item) {
+  const client = String(item?.client || '').trim();
+  const gpId = String(item?.gpId ?? item?.gpCode ?? '').trim();
+  if (client && gpId) return `${client}|||${gpId}`;
+  const productKey = getProductKey(item);
+  return client && productKey ? `${client}|||${productKey}` : '';
+}
+function splitClientProductKey(key) {
+  const parts = String(key || '').split('|||');
+  return {client: parts[0] || '', productRef: parts.slice(1).join('|||')};
+}
+function buildClientProductLabel(key, ships) {
+  const {client, productRef} = splitClientProductKey(key);
+  const rows = Array.isArray(ships) ? ships : D.ships;
+  const hit = rows.find(s => getClientProductKey(s) === key);
+  const productLabel = hit?.gpName || productRef.replace(/^id:/, '').replace(/^name:/, '');
+  if (client && productLabel) return `${client} × ${productLabel}`;
+  return client || productLabel || String(key || '').trim();
+}
+function normSearchText(value) {
+  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+function matchesSearch(query, ...parts) {
+  const needle = normSearchText(query);
+  if (!needle) return true;
+  return parts.some(part => normSearchText(part).includes(needle));
+}
 function getProducts(ships) {
   const m = new Map();
   ships.forEach(s => {
@@ -342,6 +378,7 @@ function getScenarioSet(kind) {
   if (kind === 'group') return UI.offG;
   if (kind === 'client') return UI.offC;
   if (kind === 'product') return UI.offP;
+  if (kind === 'clientProduct') return UI.offCP;
   return null;
 }
 function renderQuickEntity(kind, key, label) {
@@ -351,8 +388,22 @@ function renderQuickEntity(kind, key, label) {
   const set = getScenarioSet(kind);
   const excluded = !!set?.has(key);
   const open = !excluded && UI.quickMenu && UI.quickMenu.kind === kind && UI.quickMenu.key === key;
-  const entityText = kind === 'product' ? 'продукт' : kind === 'group' ? 'группу' : kind === 'area' ? 'участок' : 'клиента';
-  return `<div class="qwrap${open ? ' open' : ''}"><button type="button" class="qlink${excluded ? ' off' : ''}" data-qtoggle="1" data-qkind="${kind}" data-qkey="${esc(key)}" data-qlabel="${esc(text)}" data-qexcluded="${excluded ? '1' : '0'}" title="${excluded ? 'Включить обратно в расчет' : 'Исключить из расчета'}"><span class="qdot"></span><span class="qtxt">${esc(text)}</span></button>${open ? `<div class="qmenu"><div class="qmeta">Сейчас участвует в сценарии.</div><button type="button" class="qact warn" data-qact="toggle" data-qkind="${kind}" data-qkey="${esc(key)}" data-qlabel="${esc(text)}">Исключить ${entityText}</button></div>` : ''}</div>`;
+  const entityText = kind === 'clientProduct'
+    ? 'связку клиент × продукт'
+    : kind === 'product'
+      ? 'продукт'
+      : kind === 'group'
+        ? 'группу'
+        : kind === 'area'
+          ? 'участок'
+          : 'клиента';
+  const actionLabel = excluded
+    ? (kind === 'clientProduct' ? 'Включить связку обратно в расчет' : 'Включить обратно в расчет')
+    : (kind === 'clientProduct' ? 'Исключить связку клиент × продукт' : 'Исключить из расчета');
+  const metaText = kind === 'clientProduct'
+    ? 'Сейчас участвует именно эта связка клиент × продукт.'
+    : 'Сейчас участвует в сценарии.';
+  return `<div class="qwrap kind-${kind}${open ? ' open' : ''}"><button type="button" class="qlink kind-${kind}${excluded ? ' off' : ''}" data-qtoggle="1" data-qkind="${kind}" data-qkey="${esc(key)}" data-qlabel="${esc(text)}" data-qexcluded="${excluded ? '1' : '0'}" aria-label="${esc(actionLabel)}"><span class="qdot"></span><span class="qtxt">${esc(text)}</span></button>${open ? `<div class="qmenu kind-${kind}"><div class="qmeta">${metaText}</div><button type="button" class="qact warn" data-qact="toggle" data-qkind="${kind}" data-qkey="${esc(key)}" data-qlabel="${esc(text)}">Исключить ${entityText}</button></div>` : ''}</div>`;
 }
 
 function bar(v,max,color,w) {

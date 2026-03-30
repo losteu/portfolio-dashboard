@@ -24,7 +24,7 @@
 Пример простого локального сервера:
 
 ```powershell
-cd C:\Users\user\Desktop\Анализ_ТГ_участков
+cd C:\Users\niyazov.ad\Desktop\Анализ_ТГ_участков
 python -m http.server 8000
 ```
 

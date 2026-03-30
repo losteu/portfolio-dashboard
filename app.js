@@ -13,17 +13,23 @@ function bindEvents() {
   document.querySelectorAll('[data-tG]').forEach(b=>b.addEventListener('click',()=>{tog(UI.offG,b.dataset.tg);render()}));
   document.querySelectorAll('[data-tC]').forEach(b=>b.addEventListener('click',()=>{tog(UI.offC,b.dataset.tc);render()}));
   document.querySelectorAll('[data-tP]').forEach(b=>b.addEventListener('click',()=>{tog(UI.offP,b.dataset.tp);render()}));
+  document.querySelectorAll('[data-tCP]').forEach(b=>b.addEventListener('click',()=>{tog(UI.offCP,b.dataset.tcp);render()}));
   bindDebouncedInput('sG', value=>{UI.searchG=value;});
   bindDebouncedInput('sC', value=>{UI.searchC=value;});
   bindDebouncedInput('sP', value=>{UI.searchP=value;});
+  bindDebouncedInput('sTabG', value=>{UI.tabSearchG=value;UI.grpPage=0;});
+  bindDebouncedInput('sTabC', value=>{UI.tabSearchC=value;UI.cliPage=0;});
   bindDebouncedInput('sTP', value=>{UI.searchTP=value;UI.prodPage=0;});
+  bindDebouncedInput('sTabCP', value=>{UI.tabSearchCP=value;UI.cpPage=0;});
+  bindDebouncedInput('sTabA', value=>{UI.tabSearchA=value;});
   bindDebouncedInput('holdingMonthly', value=>{UI.holdingMonthlyInput=value;}, 160);
   document.getElementById('holdingAllocMode')?.addEventListener('change',e=>{UI.holdingAllocMode=e.target.value;render()});
   document.getElementById('clearHolding')?.addEventListener('click',()=>{UI.holdingMonthlyInput='';UI.holdingAllocMode='revenue';render()});
   document.getElementById('enG')?.addEventListener('click',()=>{UI.offG=new Set();render()});
   document.getElementById('enC')?.addEventListener('click',()=>{UI.offC=new Set();render()});
   document.getElementById('enP')?.addEventListener('click',()=>{UI.offP=new Set();render()});
-  document.getElementById('resetAll')?.addEventListener('click',()=>{UI.offA=new Set();UI.offG=new Set();UI.offC=new Set();UI.offP=new Set();UI.selA='';UI.selG='';UI.selC=new Set();UI._selCSearch='';UI._selCExpand=false;UI.searchG='';UI.searchC='';UI.searchP='';UI.searchTP='';UI.grpNegOnly=false;UI.cpNegOnly=false;UI.cpOpen=new Set();UI.holdingMonthlyInput='';UI.holdingAllocMode='revenue';UI.quickMenu=null;render()});
+  document.getElementById('enCP')?.addEventListener('click',()=>{UI.offCP=new Set();render()});
+  document.getElementById('resetAll')?.addEventListener('click',()=>{UI.offA=new Set();UI.offG=new Set();UI.offC=new Set();UI.offP=new Set();UI.offCP=new Set();UI.selA='';UI.selG='';UI.selC=new Set();UI._selCSearch='';UI._selCExpand=false;UI.searchG='';UI.searchC='';UI.searchP='';UI.searchTP='';UI.tabSearchG='';UI.tabSearchC='';UI.tabSearchCP='';UI.tabSearchA='';UI.grpNegOnly=false;UI.cpNegOnly=false;UI.cpOpen=new Set();UI.holdingMonthlyInput=DEFAULT_HOLDING_MONTHLY_INPUT;UI.holdingAllocMode='revenue';UI.quickMenu=null;render()});
   // Selection filters
   document.getElementById('selA')?.addEventListener('change',e=>{UI.selA=e.target.value;render()});
   document.getElementById('selG')?.addEventListener('change',e=>{UI.selG=e.target.value;render()});
